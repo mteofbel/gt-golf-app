@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GT Golf</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple:#32006E; --purple-mid:#5a0db8; --purple-light:#ede9fe; --purple-pale:#f5f0ff;
+    --green-dark:#166534; --green:#16a34a; --green-light:#dcfce7;
+    --bg:#f8f7ff; --white:#ffffff; --border:#e5e0f5; --text:#1a1228; --muted:#7c6f99;
+    --gold:#d97706; --gold-light:#fef3c7; --red:#dc2626; --red-light:#fee2e2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-height:100vh;}
+
+  /* HEADER */
+  header{background:var(--purple);padding:16px 20px 0;position:sticky;top:0;z-index:100;}
+  .header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .app-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;letter-spacing:-0.01em;}
+  .app-name span{color:#c4b5fd;}
+  .live-badge{background:rgba(255,255,255,0.15);color:white;font-size:0.7rem;font-weight:700;
+    letter-spacing:0.1em;padding:4px 10px;border-radius:20px;text-transform:uppercase;
+    display:flex;align-items:center;gap:5px;}
+  .live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;animation:blink 1.2s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+  nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav button{background:none;border:none;color:rgba(255,255,255,0.6);font-family:'Syne',sans-serif;
+    font-size:0.82rem;font-weight:600;padding:10px 16px 12px;cursor:pointer;white-space:nowrap;
+    border-bottom:3px solid transparent;transition:all 0.15s;letter-spacing:0.03em;}
+  nav button.active{color:white;border-bottom-color:#c4b5fd;}
+  nav button:hover{color:rgba(255,255,255,0.9);}
+
+  /* LOADING */
+  .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:60vh;gap:16px;}
+  .spinner{width:40px;height:40px;border:3px solid var(--purple-light);border-top-color:var(--purple);
+    border-radius:50%;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-family:'Syne',sans-serif;font-weight:700;color:var(--muted);font-size:0.9rem;}
+
+  /* MAIN */
+  main{max-width:800px;margin:0 auto;padding:20px 14px;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* CARDS */
+  .card{background:var(--white);border-radius:16px;border:1px solid var(--border);
+    overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(50,0,110,0.05);}
+  .card-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid var(--border);}
+  .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:var(--text);}
+  .card-tag{font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+    padding:3px 10px;border-radius:20px;}
+  .tag-round{background:var(--purple-light);color:var(--purple);}
+  .tag-done{background:var(--green-light);color:var(--green-dark);}
+
+  /* LEADERBOARD */
+  .lb-header{display:grid;grid-template-columns:36px 1fr 48px 48px 48px 48px 72px;
+    padding:8px 18px;border-bottom:1px solid var(--border);}
+  .lb-header span{font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;
+    text-transform:uppercase;text-align:center;}
+  .lb-header span:nth-child(2){text-align:left;}
+  .lb-header span:last-child{text-align:right;}
+  .lb-row{display:grid;grid-template-columns:36px 1fr 48px 48px 48px 48px 72px;
+    align-items:center;padding:13px 18px;border-bottom:1px solid var(--border);transition:background 0.1s;}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-row:hover{background:rgba(50,0,110,0.02);}
+  .lb-row.first-place{background:rgba(50,0,110,0.03);}
+  .lb-pos{font-family:'IBM Plex Mono',monospace;font-size:0.88rem;font-weight:600;color:var(--muted);}
+  .lb-pos.gold{color:var(--gold);}
+  .lb-name{font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+  .lb-r{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.82rem;color:var(--muted);}
+  .lb-r.pending{color:#ddd;}
+  .lb-total{text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:1rem;}
+  .lb-total.leader{color:var(--green);}
+  .diff-chip{display:inline-flex;align-items:center;font-size:0.65rem;font-weight:700;
+    padding:1px 6px;border-radius:6px;margin-left:3px;}
+  .diff-under{background:var(--green-light);color:var(--green-dark);}
+  .diff-over{background:#fee2e2;color:#991b1b;}
+
+  /* MATCHER */
+  .match-block{padding:14px 18px;border-bottom:1px solid var(--border);}
+  .match-block:last-child{border-bottom:none;}
+  .match-type{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:10px;}
+  .match-versus{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .match-player-box{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);transition:all 0.15s;}
+  .match-player-box.winner{border-color:var(--green);background:var(--green-light);}
+  .match-player-box.loser{opacity:0.5;}
+  .match-player-box.halved{border-color:var(--gold);background:var(--gold-light);}
+  .mpb-name{font-weight:700;font-size:0.95rem;}
+  .mpb-result{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;margin-top:3px;
+    color:var(--green-dark);font-weight:600;}
+  .mpb-result.loss{color:var(--muted);}
+  .mpb-result.halved-text{color:var(--gold);}
+  .versus-divider{font-family:'Syne',sans-serif;font-weight:800;font-size:0.75rem;color:var(--muted);}
+  .team-note{margin-top:6px;font-size:0.75rem;color:var(--muted);}
+
+  /* JACKET */
+  .jacket-row{display:flex;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);gap:10px;}
+  .jacket-row:last-child{border-bottom:none;}
+  .jr-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Syne',sans-serif;font-weight:800;font-size:0.82rem;}
+  .jr-rank.top{background:var(--purple);color:white;}
+  .jr-rank.bot{background:var(--purple-light);color:var(--purple);}
+  .jr-name{flex:1;font-weight:700;}
+  .jr-wl{font-family:'IBM Plex Mono',monospace;font-size:0.82rem;color:var(--muted);}
+  .jr-pts{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--purple);min-width:40px;text-align:right;}
+  .jacket-note{background:var(--purple-light);margin:0 18px 14px;border-radius:10px;
+    padding:10px 14px;font-size:0.8rem;color:var(--purple);font-weight:600;}
+
+  /* HISTORY */
+  .hist-year-block{border-bottom:1px solid var(--border);}
+  .hist-year-block:last-child{border-bottom:none;}
+  .hist-year-header{padding:14px 18px;cursor:pointer;transition:background 0.1s;}
+  .hist-year-header:hover{background:rgba(50,0,110,0.02);}
+  .hb-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .hb-year{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+  .hb-gt{font-size:0.72rem;font-weight:600;color:var(--muted);}
+  .hb-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .badge{font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:8px;}
+  .badge-jacket{background:var(--purple);color:white;}
+  .badge-stroker{background:var(--green-light);color:var(--green-dark);}
+  .badge-buddy{background:#fee2e2;color:#991b1b;}
+  .badge-played{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+  .hb-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  .hb-score-box{background:var(--bg);border-radius:8px;padding:6px 8px;text-align:center;border:1px solid var(--border);}
+  .hb-score-name{font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;}
+  .hb-score-val{font-family:'IBM Plex Mono',monospace;font-size:0.9rem;font-weight:600;margin-top:2px;}
+  .hb-score-val.low{color:var(--green-dark);}
+  .hb-score-val.high{color:var(--red);}
+  .hist-year-body{padding:0 18px 14px;display:none;}
+
+  /* ROUND ACCORDION */
+  .round-accordion{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;}
+  .round-acc-header{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;cursor:pointer;background:var(--bg);transition:background 0.1s;}
+  .round-acc-header:hover{background:var(--purple-pale);}
+  .round-acc-label{font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;}
+  .round-acc-meta{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+  .round-acc-chev{color:var(--muted);font-size:0.75rem;transition:transform 0.2s;}
+  .round-acc-body{display:none;border-top:1px solid var(--border);}
+
+  /* HOLE BY HOLE */
+  .hbh-wrap{overflow-x:auto;}
+  .hbh-table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+  .hbh-table th{background:var(--purple);color:white;font-family:'Syne',sans-serif;
+    font-size:0.68rem;font-weight:600;letter-spacing:0.06em;padding:7px 6px;text-align:center;}
+  .hbh-table th.par-th{background:#1e0045;}
+  .hbh-table td{padding:5px 6px;border-bottom:1px solid var(--border);text-align:center;
+    font-family:'IBM Plex Mono',monospace;font-size:0.8rem;}
+  .hbh-table tr:last-child td{border-bottom:none;}
+  .hbh-table tr.nine-sep td{border-bottom:2px solid var(--purple);}
+  .hbh-table tr.total-row td{background:var(--purple-pale);font-weight:700;
+    border-top:2px solid var(--purple);font-family:'Syne',sans-serif;}
+  .hbh-table td.hole-col{background:#fafafa;color:var(--muted);font-weight:600;}
+  .sc-eagle{background:#fef9c3;color:var(--gold);font-weight:700;}
+  .sc-birdie{background:var(--green-light);color:var(--green-dark);font-weight:700;}
+  .sc-bogey{background:#fee2e2;color:#991b1b;}
+  .sc-double{background:#fecaca;color:var(--red);font-weight:700;}
+
+  /* ENTER PAGE */
+  .setup-card{background:white;border-radius:16px;border:1px solid var(--border);
+    padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(50,0,110,0.05);}
+  .setup-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px;}
+  .setup-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .setup-row{margin-bottom:14px;}
+  .setup-row:last-child{margin-bottom:0;}
+  .setup-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:6px;}
+  .setup-select{width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);
+    font-family:'Lato',sans-serif;font-size:0.95rem;color:var(--text);background:var(--bg);
+    appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237c6f99' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;}
+  .setup-select:focus{outline:none;border-color:var(--purple);}
+  .setup-input{width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);
+    font-family:'Lato',sans-serif;font-size:0.95rem;color:var(--text);background:var(--bg);}
+  .setup-input:focus{outline:none;border-color:var(--purple);}
+
+  /* DATA MODE SELECTOR */
+  .mode-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .mode-btn{padding:10px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);
+    font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;text-align:center;
+    color:var(--muted);transition:all 0.15s;}
+  .mode-btn.active{border-color:var(--purple);background:var(--purple-pale);color:var(--purple);}
+
+  /* BANNERS */
+  .banner-warn{background:var(--gold-light);border:1px solid #fcd34d;border-radius:10px;
+    padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:#92400e;
+    display:flex;gap:8px;line-height:1.5;}
+  .banner-ok{background:var(--green-light);border:1px solid #86efac;border-radius:10px;
+    padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:var(--green-dark);
+    display:flex;align-items:center;gap:8px;}
+  .banner-info{background:var(--purple-pale);border:1px solid var(--purple-light);border-radius:10px;
+    padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:var(--purple);line-height:1.5;}
+
+  /* SCORE TABLE */
+  .score-table-wrap{overflow-x:auto;margin-bottom:0;}
+  .score-table{width:100%;border-collapse:collapse;font-size:0.88rem;}
+  .score-table th{background:var(--purple);color:white;font-family:'Syne',sans-serif;
+    font-weight:600;font-size:0.75rem;letter-spacing:0.06em;padding:10px 8px;text-align:center;white-space:nowrap;}
+  .score-table th.par-col{background:#1e0045;}
+  .score-table td{padding:4px 4px;border-bottom:1px solid var(--border);text-align:center;}
+  .score-table tr.nine-break td{border-bottom:3px solid var(--purple);}
+  .score-table tr.total-row td{background:var(--purple-pale);font-weight:700;border-top:2px solid var(--purple);}
+  .score-table td.hole-num{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--muted);
+    font-size:0.8rem;background:#fafafa;}
+  .score-input{width:48px;padding:6px 4px;border-radius:6px;border:1.5px solid var(--border);
+    text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.95rem;font-weight:600;
+    color:var(--text);background:white;transition:border-color 0.15s;}
+  .score-input:focus{outline:none;border-color:var(--purple);}
+  .score-input.eagle{background:#fef9c3;border-color:var(--gold);color:var(--gold);}
+  .score-input.birdie{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
+  .score-input.bogey{background:#fee2e2;border-color:#fca5a5;color:#991b1b;}
+  .score-input.double{background:#fecaca;border-color:var(--red);color:var(--red);}
+
+  /* TOTALS ENTRY (round totals mode) */
+  .totals-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px;}
+  .total-input-box{background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--border);}
+  .total-input-name{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+    color:var(--muted);margin-bottom:6px;}
+  .total-input-field{width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);
+    font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:600;text-align:center;background:white;}
+  .total-input-field:focus{outline:none;border-color:var(--purple);}
+
+  /* MATCH STATUS BAR */
+  .match-status-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .match-status-pill{flex:1;min-width:140px;background:white;border:1.5px solid var(--border);
+    border-radius:10px;padding:8px 12px;}
+  .msp-label{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:4px;}
+  .msp-status{font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;}
+  .msp-status.up{color:var(--green-dark);}
+  .msp-status.down{color:var(--red);}
+  .msp-status.even{color:var(--muted);}
+
+  /* MATCH RESULT OVERRIDE */
+  .override-block{background:var(--purple-pale);border-radius:12px;padding:14px;
+    margin-bottom:12px;border:1px solid var(--purple-light);}
+  .override-title{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--purple);margin-bottom:10px;}
+  .override-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.85rem;flex-wrap:wrap;}
+  .override-row:last-child{margin-bottom:0;}
+  .override-label{flex:1;font-weight:600;min-width:120px;}
+  .override-calc{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--green-dark);
+    font-weight:600;background:var(--green-light);padding:4px 8px;border-radius:6px;white-space:nowrap;}
+  .override-input{width:110px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);
+    font-family:'IBM Plex Mono',monospace;font-size:0.85rem;text-align:center;background:white;}
+  .override-input:focus{outline:none;border-color:var(--purple);}
+  .override-note{font-size:0.7rem;color:var(--muted);margin-top:6px;}
+
+  /* AWARDS ENTRY */
+  .awards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px;}
+  .award-box{background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--border);}
+  .award-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+    color:var(--muted);margin-bottom:6px;}
+  .award-select{width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);
+    font-family:'Lato',sans-serif;font-size:0.95rem;background:white;appearance:none;cursor:pointer;}
+  .award-select:focus{outline:none;border-color:var(--purple);}
+  .notes-input{width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);
+    font-family:'Lato',sans-serif;font-size:0.9rem;resize:none;background:white;}
+  .notes-input:focus{outline:none;border-color:var(--purple);}
+
+  /* BUTTONS */
+  .submit-btn{width:100%;background:var(--green);color:white;border:none;padding:16px;
+    border-radius:12px;font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;
+    cursor:pointer;margin-top:8px;letter-spacing:0.03em;transition:background 0.15s;}
+  .submit-btn:hover{background:#15803d;}
+  .submit-btn:disabled{background:var(--muted);cursor:not-allowed;}
+  .enter-shortcut-btn{width:100%;background:var(--purple);color:white;border:none;padding:15px;
+    border-radius:12px;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;
+    margin-bottom:20px;letter-spacing:0.03em;transition:background 0.15s;}
+  .enter-shortcut-btn:hover{background:#1e0045;}
+
+  /* EMPTY STATE */
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .empty-state .es-icon{font-size:2.5rem;margin-bottom:10px;}
+  .empty-state .es-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+    color:var(--text);margin-bottom:6px;}
+  .empty-state .es-sub{font-size:0.85rem;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+    background:#1a1228;color:white;padding:12px 24px;border-radius:24px;
+    font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;
+    z-index:999;transition:transform 0.3s;white-space:nowrap;
+    box-shadow:0 4px 20px rgba(0,0,0,0.3);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.success{background:var(--green-dark);}
+  .toast.error{background:var(--red);}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);
+    display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;}
+  .modal-overlay.hidden{display:none;}
+  .modal-box{background:white;border-radius:16px;padding:24px;max-width:360px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:8px;}
+  .modal-body{font-size:0.9rem;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-btn{flex:1;padding:12px;border-radius:10px;border:none;
+    font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;}
+  .modal-btn.cancel{background:var(--bg);color:var(--text);border:1.5px solid var(--border);}
+  .modal-btn.confirm{background:var(--gold);color:white;}
+
+  @media(max-width:500px){
+    .lb-header,.lb-row{grid-template-columns:30px 1fr 38px 38px 38px 38px 58px;padding:10px 12px;}
+    .setup-2col{grid-template-columns:1fr;}
+    .awards-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="app-name" id="header-name">GT<span>--</span></div>
+    <div class="live-badge" id="header-badge">Loading</div>
+  </div>
+  <nav>
+    <button class="active" onclick="showPage('scores')">Scores</button>
+    <button onclick="showPage('matcher')">Matcher</button>
+    <button onclick="showPage('jacket')">Jacket</button>
+    <button onclick="showPage('history')">History</button>
+    <button onclick="showPage('enter')">Enter</button>
+  </nav>
+</header>
+
+<main>
+  <div id="page-scores" class="page active"></div>
+  <div id="page-matcher" class="page"></div>
+  <div id="page-jacket" class="page"></div>
+  <div id="page-history" class="page"></div>
+  <div id="page-enter" class="page"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay hidden" id="confirm-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn confirm" onclick="confirmSave()">Overwrite</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ2shJosBTwjy195IwOUT5BfTMvA83el6PxcahA1YdBptHVwyyd7FPv_AzOAfMZERsng/exec';
+const GT_START = 2008;
+const CAL_YEAR = new Date().getFullYear();
+const PLAYERS = ['MTE','CJL','JDW','MJP'];
+
+// Award start years (from config tab, these are defaults)
+let CFG = {
+  jacket_start: 2020,
+  stroker_start: 2012,
+  buddy_start: 2011,
+  matcher_start: 2023,
+  stroker_2011: true
+};
+
+// ════════════════════════════════════════════════
+//  APP STATE
+// ════════════════════════════════════════════════
+let DB = { scores:[], rounds:[], awards:[], config:[] };
+let currentPage = 'scores';
+let enterState = {
+  year: CAL_YEAR, round: 1, mode: 'hole', // hole | totals | awards
+  course: '',
+  pars: Array(18).fill(null),
+  scores: Array.from({length:18}, () => [null,null,null,null]),
+  totals: {MTE:null,CJL:null,JDW:null,MJP:null},
+  m1: [0,1], m2: [2,3], team: 'MTE+JDW vs CJL+MJP',
+  ovr_m1:'', ovr_m2:'', ovr_team:'',
+  matchResult_m1:'', matchResult_m2:'',
+  awards: {jacket:'',stroker:'',buddy:'',notes:''}
+};
+
+// ════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════
+function gtNum(year) {
+  const n = year - GT_START + 1;
+  return 'GT' + String(n).padStart(2,'0');
+}
+
+function showAward(type, year) {
+  if (type === 'jacket') return year >= CFG.jacket_start;
+  if (type === 'stroker') return year >= CFG.stroker_start;
+  if (type === 'buddy') return year >= CFG.buddy_start;
+  if (type === 'matcher') return year >= CFG.matcher_start;
+  return false;
+}
+
+function jacketIsStroke(year) {
+  return year >= CFG.jacket_start && year < CFG.matcher_start;
+}
+
+function parChip(score, par) {
+  if (!score || !par) return '';
+  const d = score - par;
+  if (d === 0) return '';
+  const cls = d < 0 ? 'diff-under' : 'diff-over';
+  return `<span class="diff-chip ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
+}
+
+function scoreClass(score, par) {
+  if (!score || !par) return '';
+  const d = score - par;
+  if (d <= -2) return 'sc-eagle';
+  if (d === -1) return 'sc-birdie';
+  if (d === 1) return 'sc-bogey';
+  if (d >= 2) return 'sc-double';
+  return '';
+}
+
+// ════════════════════════════════════════════════
+//  DATA LOADING
+// ════════════════════════════════════════════════
+function loading(msg) {
+  return `<div class="loading-screen"><div class="spinner"></div><div class="loading-text">${msg}</div></div>`;
+}
+
+async function fetchData() {
+  try {
+    const res = await fetch(SCRIPT_URL);
+    const json = await res.json();
+    DB = json;
+    // Parse config
+    if (json.config && json.config.length) {
+      json.config.forEach(row => {
+        const k = row.Key, v = row.Value;
+        if (k === 'jacket_start') CFG.jacket_start = +v;
+        if (k === 'stroker_start') CFG.stroker_start = +v;
+        if (k === 'buddy_start') CFG.buddy_start = +v;
+        if (k === 'matcher_start') CFG.matcher_start = +v;
+        if (k === 'stroker_2011') CFG.stroker_2011 = v === 'true';
+      });
+    }
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+// ════════════════════════════════════════════════
+//  DERIVED DATA HELPERS
+// ════════════════════════════════════════════════
+function currentEventYear() {
+  const allYears = getAllDataYears();
+  if (allYears.includes(CAL_YEAR)) return CAL_YEAR;
+  return allYears.length ? Math.max(...allYears) : CAL_YEAR;
+}
+
+function getAllDataYears() {
+  const ys = new Set();
+  DB.scores.forEach(r => ys.add(+r.Year));
+  DB.rounds.forEach(r => ys.add(+r.Year));
+  DB.awards.forEach(r => ys.add(+r.Year));
+  return [...ys].sort((a,b) => a-b);
+}
+
+function getCompletedRoundsForYear(year) {
+  const fromScores = new Set(DB.scores.filter(r=>+r.Year===year).map(r=>+r.Round));
+  const fromRounds = new Set(DB.rounds.filter(r=>+r.Year===year).map(r=>+r.Round));
+  return new Set([...fromScores, ...fromRounds]);
+}
+
+// Get stroke total for a player in a year
+function getStrokeTotals(year) {
+  const totals = {};
+  PLAYERS.forEach(p => totals[p] = null);
+
+  // Try scores tab first (sum hole scores)
+  const rounds = [...getCompletedRoundsForYear(year)];
+  if (rounds.length) {
+    PLAYERS.forEach(p => {
+      let sum = 0, found = false;
+      rounds.forEach(r => {
+        // Check scores tab
+        const holeRows = DB.scores.filter(row => +row.Year===year && +row.Round===r && row[p]);
+        if (holeRows.length) {
+          holeRows.forEach(row => { if(row[p]) { sum += +row[p]; found = true; } });
+        } else {
+          // Fall back to rounds tab
+          const rndRow = DB.rounds.find(row => +row.Year===year && +row.Round===r);
+          if (rndRow && rndRow[p]) { sum += +rndRow[p]; found = true; }
+        }
+      });
+      totals[p] = found ? sum : null;
+    });
+  }
+
+  // Fall back to awards tab? No stroke data there, just names.
+  return totals;
+}
+
+// Get round-by-round totals
+function getRoundTotals(year, player) {
+  const result = [null,null,null,null];
+  for (let r=1;r<=4;r++) {
+    // Try scores tab
+    const holeRows = DB.scores.filter(row => +row.Year===year && +row.Round===r && row[player]);
+    if (holeRows.length) {
+      result[r-1] = holeRows.reduce((s,row) => s + (+row[player]||0), 0);
+    } else {
+      // Try rounds tab
+      const rndRow = DB.rounds.find(row => +row.Year===year && +row.Round===r);
+      if (rndRow && rndRow[player]) result[r-1] = +rndRow[player];
+    }
+  }
+  return result;
+}
+
+// Get pars for a round
+function getRoundPars(year, round) {
+  const holeRows = DB.scores
+    .filter(row => +row.Year===year && +row.Round===round)
+    .sort((a,b) => +a.Hole - +b.Hole);
+  if (!holeRows.length) return null;
+  return holeRows.map(row => +row.Par || null);
+}
+
+// Get hole-by-hole scores for a round
+function getHoleScores(year, round) {
+  const holeRows = DB.scores
+    .filter(row => +row.Year===year && +row.Round===round)
+    .sort((a,b) => +a.Hole - +b.Hole);
+  if (!holeRows.length) return null;
+  return holeRows.map(row => PLAYERS.map(p => +row[p]||null));
+}
+
+// Get course name for a round
+function getCourseName(year, round) {
+  // From scores tab (stored on hole 1)
+  const h1 = DB.scores.find(r => +r.Year===year && +r.Round===round && +r.Hole===1);
+  if (h1 && h1.Course) return h1.Course;
+  const rndRow = DB.rounds.find(r => +r.Year===year && +r.Round===round);
+  if (rndRow && rndRow.Course) return rndRow.Course;
+  return '';
+}
+
+// Get match info for a round
+function getMatchInfo(year, round) {
+  const rndRow = DB.rounds.find(r => +r.Year===year && +r.Round===round);
+  if (!rndRow) return null;
+  return {
+    m1: rndRow.M1 || '',
+    m1Result: rndRow.M1_Result || '',
+    m2: rndRow.M2 || '',
+    m2Result: rndRow.M2_Result || '',
+    team: rndRow.Team || '',
+    teamResult: rndRow.Team_Result || ''
+  };
+}
+
+// Get awards for a year
+function getAwards(year) {
+  return DB.awards.find(r => +r.Year === year) || null;
+}
+
+// Compute match result from hole scores
+function computeMatchResult(holeScores, p1idx, p2idx) {
+  if (!holeScores) return { text:'—', short:'—', winner:null };
+  let p1up = 0, holes = 0;
+  for (let h=0; h<18; h++) {
+    const s1 = holeScores[h][p1idx], s2 = holeScores[h][p2idx];
+    if (s1 && s2) { holes++; if(s1<s2) p1up++; else if(s2<s1) p1up--; }
+  }
+  const p1n = PLAYERS[p1idx], p2n = PLAYERS[p2idx];
+  if (holes === 0) return { text:'No scores', short:'—', winner:null };
+  const remaining = 18 - holes;
+  const lead = Math.abs(p1up);
+  if (p1up === 0) {
+    return holes===18
+      ? { text:'Halved', short:'Halved', winner:null, halved:true }
+      : { text:`All Square (thru ${holes})`, short:'AS', winner:null };
+  }
+  const winner = p1up > 0 ? p1n : p2n;
+  const loser  = p1up > 0 ? p2n : p1n;
+  if (lead > remaining) {
+    const margin = remaining===0 ? `${lead} Up` : `${lead}&${remaining}`;
+    return { text:`${winner} wins ${margin}`, short:margin, winner, loser };
+  }
+  return { text:`${winner} ${lead} Up (thru ${holes})`, short:`${lead} Up`, winner, loser };
+}
+
+// Compute jacket standings for a year (2023+)
+function computeJacketStandings(year) {
+  const records = PLAYERS.map(name => ({ name, wins:0, losses:0, pts:0 }));
+  const doneRounds = [...getCompletedRoundsForYear(year)];
+  doneRounds.forEach(r => {
+    const mi = getMatchInfo(year, r);
+    if (!mi) return;
+    const holeScores = getHoleScores(year, r);
+
+    const processMatch = (matchStr, resultStr) => {
+      if (!matchStr) return;
+      const parts = matchStr.split(' vs ');
+      if (parts.length !== 2) return;
+      const p1 = parts[0].trim(), p2 = parts[1].trim();
+      const p1rec = records.find(x=>x.name===p1);
+      const p2rec = records.find(x=>x.name===p2);
+      if (!p1rec || !p2rec) return;
+
+      let winner = null;
+      if (resultStr) {
+        // Parse stored result
+        const halved = resultStr.toLowerCase().includes('halved') || resultStr.toLowerCase().includes('as') || resultStr.toLowerCase().includes('all square');
+        if (!halved) {
+          if (resultStr.includes(p1) || resultStr.startsWith(p1)) winner = p1;
+          else if (resultStr.includes(p2) || resultStr.startsWith(p2)) winner = p2;
+        }
+      } else if (holeScores) {
+        const p1i = PLAYERS.indexOf(p1), p2i = PLAYERS.indexOf(p2);
+        if (p1i>=0 && p2i>=0) {
+          const res = computeMatchResult(holeScores, p1i, p2i);
+          winner = res.winner || null;
+        }
+      }
+      if (winner === p1) { p1rec.wins++; p1rec.pts+=2; p2rec.losses++; }
+      else if (winner === p2) { p2rec.wins++; p2rec.pts+=2; p1rec.losses++; }
+      else { p1rec.pts++; p2rec.pts++; }
+    };
+
+    processMatch(mi.m1, mi.m1Result);
+    processMatch(mi.m2, mi.m2Result);
+  });
+
+  // Sort by pts desc, then stroke total asc as tiebreaker
+  const strokeTotals = getStrokeTotals(year);
+  records.sort((a,b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    const sa = strokeTotals[a.name] || 9999;
+    const sb = strokeTotals[b.name] || 9999;
+    return sa - sb;
+  });
+  return records;
+}
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const idx = ['scores','matcher','jacket','history','enter'].indexOf(id);
+  document.querySelectorAll('nav button')[idx].classList.add('active');
+  currentPage = id;
+  window.scrollTo(0,0);
+  renderPage(id);
+}
+
+function renderPage(id) {
+  if (id==='scores') renderScores();
+  else if (id==='matcher') renderMatcher();
+  else if (id==='jacket') renderJacket();
+  else if (id==='history') renderHistory();
+  else if (id==='enter') renderEnter();
+}
+
+// ════════════════════════════════════════════════
+//  HEADER
+// ════════════════════════════════════════════════
+function updateHeader() {
+  const year = currentEventYear();
+  const gt = gtNum(year);
+  const num = gt.replace('GT','');
+  document.getElementById('header-name').innerHTML = `GT<span>${num}</span> · ${year}`;
+  document.title = `${gt} · ${year}`;
+
+  const doneRounds = getCompletedRoundsForYear(year);
+  const badge = document.getElementById('header-badge');
+  if (doneRounds.size === 4) badge.textContent = `${gt} · Complete`;
+  else if (doneRounds.size > 0) badge.textContent = `${gt} · Live · R${Math.max(...doneRounds)}`;
+  else badge.textContent = `${gt} · Upcoming`;
+}
+
+// ════════════════════════════════════════════════
+//  SCORES PAGE
+// ════════════════════════════════════════════════
+function renderScores() {
+  const year = currentEventYear();
+  const gt = gtNum(year);
+  const doneRounds = getCompletedRoundsForYear(year);
+  const nextRound = doneRounds.size < 4 ? doneRounds.size + 1 : null;
+
+  let html = '';
+  if (nextRound) {
+    html += `<button class="enter-shortcut-btn" onclick="showPage('enter')">+ Enter Round ${nextRound} Scores</button>`;
+  }
+
+  html += `<div class="card"><div class="card-head">
+    <div class="card-title">🏆 Stroker Leaderboard</div>
+    <span class="card-tag tag-round">${gt} · R${doneRounds.size}/4</span>
+  </div>`;
+
+  if (doneRounds.size === 0) {
+    html += `<div class="empty-state"><div class="es-icon">⛳</div>
+      <div class="es-title">No scores yet for ${year}</div>
+      <div class="es-sub">Head to Enter to add Round 1 scores.</div></div>`;
+  } else {
+    // Build leaderboard
+    const lbData = PLAYERS.map(name => {
+      const rounds = getRoundTotals(year, name);
+      const filled = rounds.filter(r=>r!==null);
+      return { name, rounds, total: filled.length ? filled.reduce((a,b)=>a+b,0) : null };
+    }).sort((a,b) => {
+      if (a.total===null && b.total===null) return 0;
+      if (a.total===null) return 1;
+      if (b.total===null) return -1;
+      return a.total - b.total;
+    });
+
+    // Par totals by round
+    const parByRound = [1,2,3,4].map(r => {
+      const pars = getRoundPars(year, r);
+      if (!pars) return null;
+      return pars.reduce((a,b) => a+(b||0), 0) || null;
+    });
+    const totalPar = parByRound.filter(p=>p!==null).reduce((a,b)=>a+b,0) || null;
+
+    html += `<div class="lb-header">
+      <span></span><span>Golfer</span>
+      <span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>Total</span>
+    </div>`;
+
+    lbData.forEach((p, i) => {
+      const isFirst = i===0 && p.total!==null;
+      const isLast = i===lbData.length-1 && p.total!==null;
+      const chip = (p.total && totalPar) ? parChip(p.total, totalPar) : '';
+      const buddyMark = isLast ? ' 🪆' : '';
+
+      const rCells = p.rounds.map(r =>
+        r===null ? `<div class="lb-r pending">—</div>` : `<div class="lb-r">${r}</div>`
+      ).join('');
+
+      html += `<div class="lb-row ${isFirst?'first-place':''}">
+        <div class="lb-pos ${isFirst?'gold':''}">${p.total!==null ? i+1 : '—'}</div>
+        <div class="lb-name">${p.name}${chip}${buddyMark}</div>
+        ${rCells}
+        <div class="lb-total ${isFirst?'leader':''}">${p.total!==null?p.total:'—'}</div>
+      </div>`;
+    });
+  }
+
+  html += `</div>`;
+  document.getElementById('page-scores').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════
+//  MATCHER PAGE
+// ════════════════════════════════════════════════
+function renderMatcher() {
+  const year = currentEventYear();
+  const doneRounds = [...getCompletedRoundsForYear(year)].sort();
+
+  let html = `<div class="card"><div class="card-head">
+    <div class="card-title">⛳ Match Results</div>
+    <span class="card-tag tag-round">${gtNum(year)}</span>
+  </div>`;
+
+  if (!doneRounds.length) {
+    html += `<div class="empty-state"><div class="es-icon">🥊</div>
+      <div class="es-title">No matches yet</div>
+      <div class="es-sub">Enter Round 1 to see results.</div></div>`;
+    html += `</div>`;
+    document.getElementById('page-matcher').innerHTML = html;
+    return;
+  }
+
+  doneRounds.forEach(r => {
+    const mi = getMatchInfo(year, r);
+    if (!mi || (!mi.m1 && !mi.m2)) return;
+    const holeScores = getHoleScores(year, r);
+    const label = r===4 ? `Round 4 · Championship 🟣` : `Round ${r}`;
+    const labelColor = r===4 ? 'style="color:var(--purple)"' : '';
+
+    html += `<div class="match-block"><div class="match-type" ${labelColor}>${label}</div>`;
+
+    const renderMatch = (matchStr, resultStr) => {
+      if (!matchStr) return '';
+      const parts = matchStr.split(' vs ');
+      if (parts.length !== 2) return '';
+      const p1n = parts[0].trim(), p2n = parts[1].trim();
+      const p1i = PLAYERS.indexOf(p1n), p2i = PLAYERS.indexOf(p2n);
+
+      let res;
+      if (resultStr) {
+        const halved = resultStr.toLowerCase().includes('halved') || resultStr.toLowerCase().includes('all square');
+        const win1 = !halved && (resultStr.startsWith(p1n) || (resultStr.includes(p1n) && !resultStr.includes(p2n+'win')));
+        const win2 = !halved && resultStr.startsWith(p2n);
+        res = { winner: win1 ? p1n : win2 ? p2n : null, halved, text: resultStr };
+      } else if (holeScores && p1i>=0 && p2i>=0) {
+        res = computeMatchResult(holeScores, p1i, p2i);
+      } else {
+        res = { text:'—', winner:null };
+      }
+
+      const p1win = res.winner===p1n, p2win = res.winner===p2n;
+      const halved = res.halved || (!res.winner && res.text?.toLowerCase().includes('halved'));
+
+      return `<div class="match-versus">
+        <div class="match-player-box ${p1win?'winner':p2win?'loser':halved?'halved':''}">
+          <div class="mpb-name">${p1n}</div>
+          <div class="mpb-result ${p2win?'loss':halved?'halved-text':''}">${p1win?'W':''}${halved?'Halved':''}${p2win?'L':''} ${res.text&&!p1win&&!p2win&&!halved?res.text:''}</div>
+        </div>
+        <div class="versus-divider">vs</div>
+        <div class="match-player-box ${p2win?'winner':p1win?'loser':halved?'halved':''}">
+          <div class="mpb-name">${p2n}</div>
+          <div class="mpb-result ${p1win?'loss':halved?'halved-text':''}">${p2win?'W':''}${halved?'Halved':''}${p1win?'L':''}</div>
+        </div>
+      </div>`;
+    };
+
+    html += renderMatch(mi.m1, mi.m1Result);
+    html += `<div style="margin-top:8px;">` + renderMatch(mi.m2, mi.m2Result) + `</div>`;
+
+    if (mi.team && r < 4) {
+      html += `<div class="team-note">🏌 Team: ${mi.team}${mi.teamResult?' · '+mi.teamResult:''}</div>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  document.getElementById('page-matcher').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════
+//  JACKET PAGE
+// ════════════════════════════════════════════════
+function renderJacket() {
+  const year = currentEventYear();
+  const doneRounds = getCompletedRoundsForYear(year);
+  let html = '';
+
+  if (year < CFG.matcher_start) {
+    // Jacket = stroker for 2020-2022; no jacket before 2020
+    html = `<div class="card"><div class="card-head">
+      <div class="card-title">🟣 Purple Jacket</div></div>
+      <div class="empty-state"><div class="es-icon">🟣</div>
+        <div class="es-title">Match play started in ${CFG.matcher_start}</div>
+        <div class="es-sub">For ${year}, the Purple Jacket went to the Stroker winner.</div>
+      </div></div>`;
+    document.getElementById('page-jacket').innerHTML = html;
+    return;
+  }
+
+  if (!doneRounds.size) {
+    html = `<div class="card"><div class="empty-state"><div class="es-icon">🟣</div>
+      <div class="es-title">No matches yet for ${year}</div>
+      <div class="es-sub">Match play standings appear after Round 1.</div>
+    </div></div>`;
+    document.getElementById('page-jacket').innerHTML = html;
+    return;
+  }
+
+  const standings = computeJacketStandings(year);
+  const doneCount = doneRounds.size;
+
+  html = `<div class="card"><div class="card-head">
+    <div class="card-title">🟣 Purple Jacket Standings</div>
+    <span class="card-tag" style="background:var(--purple-light);color:var(--purple);">After R${doneCount}</span>
+  </div>`;
+
+  standings.forEach((p,i) => {
+    const rankCls = i<2?'top':'bot';
+    const ptStyle = i>=2?'style="color:var(--muted)"':'';
+    html += `<div class="jacket-row">
+      <div class="jr-rank ${rankCls}">${i+1}</div>
+      <div class="jr-name">${p.name}</div>
+      <div class="jr-wl">${p.wins}W · ${p.losses}L</div>
+      <div class="jr-pts" ${ptStyle}>${p.pts}</div>
+    </div>`;
+  });
+
+  if (doneCount >= 3) {
+    const s = standings;
+    html += `<div class="jacket-note">
+      R4: ${s[0].name} (#1) vs ${s[1].name} (#2) · 🟣 Purple Jacket<br>
+      ${s[2].name} (#3) vs ${s[3].name} (#4) · 3rd Place
+    </div>`;
+  }
+
+  html += `</div><div class="card"><div class="card-head">
+    <div class="card-title">📐 Seeding Tiebreakers</div></div>
+    <div style="padding:14px 18px;font-size:0.88rem;line-height:1.7;">
+      <strong>1st:</strong> Individual match play record (W–L)<br>
+      <strong>2nd:</strong> Head-to-head result between tied players<br>
+      <strong>3rd:</strong> Stroke play total across completed rounds<br>
+      <strong>4th:</strong> Coin flip / mutual decision
+    </div></div>`;
+
+  document.getElementById('page-jacket').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════
+//  HISTORY PAGE
+// ════════════════════════════════════════════════
+function renderHistory() {
+  const curYear = currentEventYear();
+  const allYears = getAllDataYears().filter(y => y !== curYear).sort((a,b)=>b-a);
+
+  // Also include all years 2008+ that we know about even if no data
+  const knownYears = new Set(allYears);
+  // Only show years with actual data in history
+  let html = `<div class="card">`;
+
+  if (!allYears.length) {
+    html += `<div class="empty-state"><div class="es-icon">📅</div>
+      <div class="es-title">No historical data yet</div>
+      <div class="es-sub">Past years will appear here after you enter data for prior years.</div>
+    </div>`;
+    html += `</div>`;
+    document.getElementById('page-history').innerHTML = html;
+    return;
+  }
+
+  allYears.forEach(year => {
+    const gt = gtNum(year);
+    const awards = getAwards(year);
+    const strokeTotals = getStrokeTotals(year);
+    const doneRounds = getCompletedRoundsForYear(year);
+    const hasScores = doneRounds.size > 0;
+
+    // Determine award winners
+    const jacketWinner = awards?.Jacket || '';
+    const strokerWinner = awards?.Stroker || '';
+    const buddyWinner = awards?.Buddy || '';
+    const notes = awards?.Notes || '';
+
+    // Score boxes (sorted by total)
+    const scoreBoxes = PLAYERS
+      .map(p => ({ p, total: strokeTotals[p] }))
+      .filter(x => x.total !== null)
+      .sort((a,b) => a.total-b.total);
+
+    const minTotal = scoreBoxes.length ? scoreBoxes[0].total : null;
+    const maxTotal = scoreBoxes.length ? scoreBoxes[scoreBoxes.length-1].total : null;
+
+    // Award badges
+    let badges = '';
+    if (jacketWinner && showAward('jacket', year)) {
+      const label = jacketIsStroke(year) ? `🟣 Jacket (Stroke): ${jacketWinner}` : `🟣 Jacket: ${jacketWinner}`;
+      badges += `<span class="badge badge-jacket">${label}</span>`;
+    }
+    if (strokerWinner && showAward('stroker', year)) {
+      badges += `<span class="badge badge-stroker">🏆 Stroker: ${strokerWinner}</span>`;
+    } else if (year === 2011 && strokerWinner) {
+      badges += `<span class="badge badge-stroker">🏆 Low Score: ${strokerWinner}</span>`;
+    }
+    if (buddyWinner && showAward('buddy', year)) {
+      badges += `<span class="badge badge-buddy">🪆 Buddy: ${buddyWinner}</span>`;
+    }
+    if (!badges && !hasScores) {
+      badges = `<span class="badge badge-played">We Played</span>`;
+    }
+    if (notes) badges += `<span class="badge badge-played">${notes}</span>`;
+
+    html += `<div class="hist-year-block" id="hyb-${year}">
+      <div class="hist-year-header" onclick="toggleYear(${year})">
+        <div class="hb-top">
+          <span class="hb-year">${year} <span class="hb-gt">${gt}</span></span>
+          <span style="color:var(--muted);font-size:0.8rem;" id="chev-${year}">▼</span>
+        </div>
+        ${badges ? `<div class="hb-badges">${badges}</div>` : ''}
+        ${scoreBoxes.length ? `<div class="hb-scores">
+          ${scoreBoxes.map(({p,total}) => `<div class="hb-score-box">
+            <div class="hb-score-name">${p}</div>
+            <div class="hb-score-val ${total===minTotal?'low':total===maxTotal?'high':''}">${total}</div>
+          </div>`).join('')}
+        </div>` : ''}
+      </div>
+      <div class="hist-year-body" id="hyb-body-${year}">
+        ${buildHistYearDetail(year)}
+      </div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  document.getElementById('page-history').innerHTML = html;
+}
+
+function toggleYear(year) {
+  const body = document.getElementById(`hyb-body-${year}`);
+  const chev = document.getElementById(`chev-${year}`);
+  const isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  chev.textContent = isOpen ? '▼' : '▲';
+}
+
+function buildHistYearDetail(year) {
+  const doneRounds = [...getCompletedRoundsForYear(year)].sort();
+  if (!doneRounds.length) return `<p style="color:var(--muted);font-size:0.85rem;padding:8px 0 0;">No round data available.</p>`;
+
+  return doneRounds.map(r => {
+    const course = getCourseName(year, r);
+    const holeScores = getHoleScores(year, r);
+    const pars = getRoundPars(year, r);
+    const mi = getMatchInfo(year, r);
+
+    // Round totals
+    const rndTotals = PLAYERS.map(p => {
+      if (holeScores) {
+        const sum = holeScores.reduce((s,row,h) => s+(row[PLAYERS.indexOf(p)]||0),0);
+        return sum || null;
+      }
+      const rndRow = DB.rounds.find(row => +row.Year===year && +row.Round===r);
+      return rndRow && rndRow[p] ? +rndRow[p] : null;
+    });
+
+    const parSum = pars ? pars.reduce((a,b)=>a+(b||0),0) : null;
+    const scoresMeta = PLAYERS.map((p,i)=>rndTotals[i]?`${p}: ${rndTotals[i]}`:'').filter(Boolean).join(' · ');
+    const roundLabel = r===4 ? 'Round 4 — Championship 🟣' : `Round ${r}`;
+
+    return `<div class="round-accordion">
+      <div class="round-acc-header" onclick="toggleRound(${year},${r},this)">
+        <div>
+          <div class="round-acc-label">${roundLabel}</div>
+          <div class="round-acc-meta">${[course?'📍 '+course:'', parSum?'Par '+parSum:'', scoresMeta].filter(Boolean).join(' · ')}</div>
+        </div>
+        <span class="round-acc-chev" id="racc-${year}-${r}">▼</span>
+      </div>
+      <div class="round-acc-body" id="racc-body-${year}-${r}">
+        ${holeScores && pars ? buildHBHTable(holeScores, pars) : buildRoundTotalsDisplay(rndTotals)}
+        ${mi ? buildMatchSummary(mi) : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRound(year, r, el) {
+  const body = document.getElementById(`racc-body-${year}-${r}`);
+  const chev = document.getElementById(`racc-${year}-${r}`);
+  const isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  chev.textContent = isOpen ? '▼' : '▲';
+}
+
+function buildHBHTable(holeScores, pars) {
+  const parSum = pars.reduce((a,b)=>a+(b||0),0);
+  let html = `<div class="hbh-wrap"><table class="hbh-table"><thead><tr>
+    <th>#</th><th class="par-th">Par</th>${PLAYERS.map(p=>`<th>${p}</th>`).join('')}
+  </tr></thead><tbody>`;
+
+  for (let h=0; h<18; h++) {
+    const sep = h===8?' class="nine-sep"':'';
+    html += `<tr${sep}><td class="hole-col">${h+1}</td><td>${pars[h]||'—'}</td>
+      ${PLAYERS.map((_,pi)=>{
+        const s=holeScores[h][pi];
+        return `<td class="${scoreClass(s,pars[h])}">${s||'—'}</td>`;
+      }).join('')}</tr>`;
+  }
+
+  html += `<tr class="total-row"><td>Total</td><td>${parSum||'—'}</td>
+    ${PLAYERS.map((_,pi)=>{
+      const sum=holeScores.reduce((s,row)=>s+(row[pi]||0),0);
+      return `<td>${sum||'—'}</td>`;
+    }).join('')}</tr>`;
+
+  return html + `</tbody></table></div>`;
+}
+
+function buildRoundTotalsDisplay(totals) {
+  return `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;">
+    ${PLAYERS.map((p,i)=>`<div class="hb-score-box">
+      <div class="hb-score-name">${p}</div>
+      <div class="hb-score-val">${totals[i]||'—'}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function buildMatchSummary(mi) {
+  if (!mi.m1 && !mi.m2) return '';
+  let html = `<div style="background:var(--purple-pale);border-top:1px solid var(--border);
+    padding:8px 14px;font-size:0.82rem;color:var(--purple);font-weight:600;">Match Results</div>
+    <div style="padding:8px 14px;font-size:0.85rem;display:flex;flex-direction:column;gap:4px;">`;
+  if (mi.m1) html += `<div><strong>${mi.m1}:</strong> ${mi.m1Result||'—'}</div>`;
+  if (mi.m2) html += `<div><strong>${mi.m2}:</strong> ${mi.m2Result||'—'}</div>`;
+  html += `</div>`;
+  if (mi.team) html += `<div style="padding:4px 14px 10px;font-size:0.8rem;color:var(--muted);">
+    🏌 Team: ${mi.team}${mi.teamResult?' · '+mi.teamResult:''}</div>`;
+  return html;
+}
+
+// ════════════════════════════════════════════════
+//  ENTER PAGE — PASSWORD PROTECTION
+// ════════════════════════════════════════════════
+let enterUnlocked = false;
+const ENTER_PASSWORD = 'ThatGuy';
+
+function renderEnterLock() {
+  document.getElementById('page-enter').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:20px;">
+      <div style="background:white;border-radius:20px;border:1px solid var(--border);
+        padding:36px 32px;max-width:320px;width:100%;text-align:center;
+        box-shadow:0 4px 24px rgba(50,0,110,0.08);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;
+          margin-bottom:6px;">Score Entry</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:24px;line-height:1.5;">
+          Enter the password to access score entry.
+        </div>
+        <input type="password" id="pw-input"
+          placeholder="Password"
+          style="width:100%;padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);
+            font-family:'Lato',sans-serif;font-size:1rem;text-align:center;margin-bottom:10px;
+            background:var(--bg);outline:none;"
+          onkeydown="if(event.key==='Enter')checkPassword()"
+          onfocus="this.style.borderColor='var(--purple)'"
+          onblur="this.style.borderColor='var(--border)'">
+        <div id="pw-error" style="color:var(--red);font-size:0.8rem;min-height:18px;margin-bottom:10px;"></div>
+        <button onclick="checkPassword()"
+          style="width:100%;background:var(--purple);color:white;border:none;padding:13px;
+            border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;
+            cursor:pointer;letter-spacing:0.03em;">
+          Unlock &#x2192;
+        </button>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('pw-input')?.focus(), 100);
+}
+
+function checkPassword() {
+  const val = document.getElementById('pw-input')?.value || '';
+  if (val === ENTER_PASSWORD) {
+    enterUnlocked = true;
+    renderEnter();
+  } else {
+    const err = document.getElementById('pw-error');
+    const input = document.getElementById('pw-input');
+    if (err) err.textContent = 'Incorrect password — try again.';
+    if (input) { input.value = ''; input.focus(); input.style.borderColor = 'var(--red)'; }
+    setTimeout(() => {
+      if (err) err.textContent = '';
+      if (input) input.style.borderColor = 'var(--border)';
+    }, 2500);
+  }
+}
+
+// ════════════════════════════════════════════════
+//  ENTER PAGE
+// ════════════════════════════════════════════════
+function renderEnter() {
+  if (!enterUnlocked) { renderEnterLock(); return; }
+  const es = enterState;
+  const year = es.year;
+  const round = es.round;
+  const mode = es.mode;
+  const gt = gtNum(year);
+
+  // Check existing data
+  const hasHoleData = DB.scores.some(r => +r.Year===year && +r.Round===round);
+  const hasRoundData = DB.rounds.some(r => +r.Year===year && +r.Round===round);
+  const hasAwardData = DB.awards.some(r => +r.Year===year);
+  const hasData = hasHoleData || hasRoundData || hasAwardData;
+
+  // Build year options
+  const yearOpts = [];
+  for (let y=CAL_YEAR; y>=GT_START; y--) {
+    yearOpts.push(`<option value="${y}" ${y===year?'selected':''}>${y} (${gtNum(y)})</option>`);
+  }
+
+  // Round options (only relevant for hole/totals modes)
+  const roundOpts = [1,2,3,4].map(r =>
+    `<option value="${r}" ${r===round?'selected':''}>${r===4?'Round 4 — Championship':'Round '+r}</option>`
+  ).join('');
+
+  // Match setup
+  const matchOpts = getMatchOptions();
+  const m1Opts = matchOpts.map((o,i) =>
+    `<option value="${i}" ${es.m1[0]===o.m1[0]&&es.m1[1]===o.m1[1]?'selected':''}>${PLAYERS[o.m1[0]]} vs ${PLAYERS[o.m1[1]]}</option>`
+  ).join('');
+  const teamOpts = getTeamOptions().map(t =>
+    `<option value="${t}" ${es.team===t?'selected':''}>${t}</option>`
+  ).join('');
+
+  // Data banner
+  let banner = '';
+  if (hasData) {
+    const savedWhen = getSavedTime(year, round, mode);
+    banner = `<div class="banner-warn"><span>⚠️</span>
+      <div><strong>Data already exists</strong> for ${gt}${mode==='awards'?'':', Round '+round}.
+      ${savedWhen?'Last saved: '+savedWhen+'.':''} Saving will overwrite it.</div></div>`;
+  } else {
+    banner = `<div class="banner-ok">✅ No data yet for ${gt}${mode==='awards'?'':', Round '+round} — fresh entry.</div>`;
+  }
+
+  let html = `
+  <div class="setup-card">
+    <div class="setup-title">⚙️ Round Setup</div>
+
+    <div class="setup-2col">
+      <div><div class="setup-label">Year</div>
+        <select class="setup-select" id="sel-year" onchange="onYearChange(+this.value)">
+          ${yearOpts.join('')}
+        </select>
+      </div>
+      <div><div class="setup-label">Entry Type</div>
+        <div class="mode-selector" style="margin-bottom:0;">
+          <button class="mode-btn ${mode==='hole'?'active':''}" onclick="setMode('hole')">Hole by Hole</button>
+          <button class="mode-btn ${mode==='totals'?'active':''}" onclick="setMode('totals')">Round Totals</button>
+          <button class="mode-btn ${mode==='awards'?'active':''}" onclick="setMode('awards')">Awards Only</button>
+        </div>
+      </div>
+    </div>
+
+    ${mode !== 'awards' ? `
+    <div class="setup-2col" style="margin-top:0;">
+      <div><div class="setup-label">Round</div>
+        <select class="setup-select" id="sel-round" onchange="onRoundChange(+this.value)">${roundOpts}</select>
+      </div>
+      <div><div class="setup-label">Course Name</div>
+        <select class="setup-select" id="sel-course" onchange="enterState.course=this.value">
+          ${buildCourseOptions(es.course)}
+        </select>
+      </div>
+    </div>` : ''}
+
+    ${banner}
+
+    ${mode !== 'awards' && round < 4 ? `
+    <div class="setup-row">
+      <div class="setup-label">Match 1</div>
+      <select class="setup-select" id="sel-m1" onchange="onM1Change(+this.value)">${m1Opts}</select>
+    </div>
+    <div class="setup-row">
+      <div class="setup-label">Match 2 (auto)</div>
+      <select class="setup-select" disabled>
+        <option>${PLAYERS[es.m2[0]]} vs ${PLAYERS[es.m2[1]]}</option>
+      </select>
+    </div>
+    <div class="setup-row" style="margin-bottom:0;">
+      <div class="setup-label">Team Match</div>
+      <select class="setup-select" id="sel-team" onchange="enterState.team=this.value">${teamOpts}</select>
+    </div>` : ''}
+  </div>`;
+
+  // Mode-specific content
+  if (mode === 'hole') {
+    html += buildHoleEntrySection();
+  } else if (mode === 'totals') {
+    html += buildTotalsEntrySection();
+  } else {
+    html += buildAwardsEntrySection(year);
+  }
+
+  html += `<button class="submit-btn" onclick="saveEntry()">✓ Save</button>`;
+
+  document.getElementById('page-enter').innerHTML = html;
+  if (mode === 'hole') recolorAllCells();
+}
+
+function buildCourseOptions(current) {
+  // A list of common/known courses plus the current value
+  const courses = [
+    '', // blank = not specified
+    'Highlander',
+    'Desert Canyon',
+    'Bear Mountain',
+    'Gamble Sands',
+    'Gamble Sands - Scarecrow',
+    'Chelan Muni',
+  ];
+  if (current && !courses.includes(current)) courses.splice(1,0,current);
+  return courses.map(c => `<option value="${c}" ${c===current?'selected':''}>${c||'— Not specified —'}</option>`).join('');
+}
+
+function buildHoleEntrySection() {
+  const es = enterState;
+  // Match status pills
+  const r1 = computeMatchResult(es.scores, es.m1[0], es.m1[1]);
+  const r2 = computeMatchResult(es.scores, es.m2[0], es.m2[1]);
+  const s1cls = r1.winner ? 'up' : 'even';
+  const s2cls = r2.winner ? 'up' : 'even';
+
+  let html = `
+  <div class="match-status-bar">
+    <div class="match-status-pill">
+      <div class="msp-label">${PLAYERS[es.m1[0]]} vs ${PLAYERS[es.m1[1]]}</div>
+      <div class="msp-status ${s1cls}" id="status-m1">${r1.text}</div>
+    </div>
+    <div class="match-status-pill">
+      <div class="msp-label">${PLAYERS[es.m2[0]]} vs ${PLAYERS[es.m2[1]]}</div>
+      <div class="msp-status ${s2cls}" id="status-m2">${r2.text}</div>
+    </div>
+  </div>
+
+  <div class="card"><div class="card-head">
+    <div class="card-title">📋 Hole-by-Hole Scores</div>
+    <span class="card-tag tag-round">${gtNum(enterState.year)} · R${enterState.round}</span>
+  </div>
+  <div class="score-table-wrap"><table class="score-table">
+    <thead><tr>
+      <th>#</th><th class="par-col">Par</th>
+      ${PLAYERS.map(p=>`<th>${p}</th>`).join('')}
+    </tr></thead>
+    <tbody id="score-tbody">`;
+
+  for (let h=0; h<18; h++) {
+    const sep = h===8?' class="nine-break"':'';
+    html += `<tr${sep}><td class="hole-num">${h+1}</td>
+      <td><input type="number" class="score-input" id="par-${h}" min="3" max="6"
+        value="${es.pars[h]||''}" placeholder="—"
+        oninput="onParInput(${h},this.value)"></td>
+      ${PLAYERS.map((_,pi)=>`<td><input type="number" class="score-input" id="sc-${h}-${pi}"
+        min="1" max="15" value="${es.scores[h][pi]||''}" placeholder="—"
+        oninput="onScoreInput(${h},${pi},this.value)"></td>`).join('')}
+    </tr>`;
+  }
+
+  html += `<tr class="total-row"><td>Total</td><td id="par-total">—</td>
+    ${PLAYERS.map((_,pi)=>`<td id="total-${pi}">—</td>`).join('')}
+  </tr></tbody></table></div></div>`;
+
+  // Overrides
+  html += buildOverridesSection();
+  return html;
+}
+
+function buildTotalsEntrySection() {
+  const es = enterState;
+  return `<div class="card"><div class="card-head">
+    <div class="card-title">📊 Round Totals</div>
+    <span class="card-tag tag-round">${gtNum(es.year)} · R${es.round}</span>
+  </div>
+  <div class="totals-grid">
+    ${PLAYERS.map(p=>`<div class="total-input-box">
+      <div class="total-input-name">${p}</div>
+      <input type="number" class="total-input-field" id="tot-${p}"
+        min="50" max="150" placeholder="—" value="${es.totals[p]||''}"
+        oninput="enterState.totals['${p}']=+this.value||null">
+    </div>`).join('')}
+  </div></div>
+  ${buildOverridesSection()}`;
+}
+
+function buildAwardsEntrySection(year) {
+  const es = enterState;
+  const aw = es.awards;
+  const playerOpts = (val) => `<option value="">—</option>${PLAYERS.map(p=>`<option value="${p}" ${p===val?'selected':''}>${p}</option>`).join('')}`;
+
+  let html = `<div class="card"><div class="card-head">
+    <div class="card-title">🏅 Awards — ${year}</div></div>
+  <div class="awards-grid">`;
+
+  if (showAward('jacket', year)) {
+    const label = jacketIsStroke(year) ? '🟣 Purple Jacket (Stroker)' : '🟣 Purple Jacket (Match Play)';
+    html += `<div class="award-box"><div class="award-label">${label}</div>
+      <select class="award-select" id="aw-jacket" onchange="enterState.awards.jacket=this.value">${playerOpts(aw.jacket)}</select>
+    </div>`;
+  }
+
+  if (showAward('stroker', year) && !jacketIsStroke(year)) {
+    html += `<div class="award-box"><div class="award-label">🏆 Stroker (Low Score)</div>
+      <select class="award-select" id="aw-stroker" onchange="enterState.awards.stroker=this.value">${playerOpts(aw.stroker)}</select>
+    </div>`;
+  } else if (year === 2011) {
+    html += `<div class="award-box"><div class="award-label">🏆 Low Score (pre-Stroker)</div>
+      <select class="award-select" id="aw-stroker" onchange="enterState.awards.stroker=this.value">${playerOpts(aw.stroker)}</select>
+    </div>`;
+  }
+
+  if (showAward('buddy', year)) {
+    html += `<div class="award-box"><div class="award-label">🪆 Buddy (High Score)</div>
+      <select class="award-select" id="aw-buddy" onchange="enterState.awards.buddy=this.value">${playerOpts(aw.buddy)}</select>
+    </div>`;
+  }
+
+  html += `</div>
+  <div style="padding:0 16px 16px;">
+    <div class="setup-label" style="margin-bottom:6px;">Notes (optional)</div>
+    <textarea class="notes-input" rows="2" placeholder="e.g. First tournament, hosted at..."
+      oninput="enterState.awards.notes=this.value">${aw.notes||''}</textarea>
+  </div></div>`;
+
+  return html;
+}
+
+function buildOverridesSection() {
+  const es = enterState;
+  const r1 = computeMatchResult(es.scores, es.m1[0], es.m1[1]);
+  const r2 = computeMatchResult(es.scores, es.m2[0], es.m2[1]);
+  const p1=PLAYERS[es.m1[0]],p2=PLAYERS[es.m1[1]];
+  const p3=PLAYERS[es.m2[0]],p4=PLAYERS[es.m2[1]];
+  const isR4 = es.round === 4;
+
+  return `<div class="override-block">
+    <div class="override-title">Match Results · Auto-calculated · Override if needed</div>
+    <div class="override-row">
+      <span class="override-label">${isR4?'🟣 ':''}${p1} vs ${p2}</span>
+      <span class="override-calc" id="calc-m1">${r1.text}</span>
+      <input type="text" class="override-input" placeholder="e.g. 3&2"
+        value="${es.ovr_m1}" oninput="enterState.ovr_m1=this.value" id="ovr-m1">
+    </div>
+    <div class="override-row">
+      <span class="override-label">${p3} vs ${p4}</span>
+      <span class="override-calc" id="calc-m2">${r2.text}</span>
+      <input type="text" class="override-input" placeholder="e.g. 1 Up"
+        value="${es.ovr_m2}" oninput="enterState.ovr_m2=this.value" id="ovr-m2">
+    </div>
+    ${es.round < 4 ? `<div class="override-row">
+      <span class="override-label">Team: ${es.team}</span>
+      <span class="override-calc" id="calc-team">—</span>
+      <input type="text" class="override-input" placeholder="e.g. 2&1"
+        value="${es.ovr_team}" oninput="enterState.ovr_team=this.value" id="ovr-team">
+    </div>` : ''}
+    <div class="override-note">Leave override blank to use the auto-calculated result.</div>
+  </div>`;
+}
+
+function getSavedTime(year, round, mode) {
+  // We don't store a timestamp in sheets, so just return empty
+  return '';
+}
+
+// ════════════════════════════════════════════════
+//  ENTER EVENT HANDLERS
+// ════════════════════════════════════════════════
+function onYearChange(year) {
+  enterState.year = year;
+  resetEnterScores();
+  renderEnter();
+}
+
+function onRoundChange(round) {
+  enterState.round = round;
+  if (round === 4) {
+    // Auto-set matchups from seedings
+    const standings = computeJacketStandings(enterState.year);
+    if (standings.length === 4) {
+      enterState.m1 = [PLAYERS.indexOf(standings[0].name), PLAYERS.indexOf(standings[1].name)];
+      enterState.m2 = [PLAYERS.indexOf(standings[2].name), PLAYERS.indexOf(standings[3].name)];
+    }
+    enterState.team = null;
+  }
+  resetEnterScores();
+  renderEnter();
+}
+
+function setMode(mode) {
+  enterState.mode = mode;
+  renderEnter();
+}
+
+function onM1Change(idx) {
+  const opts = getMatchOptions();
+  const chosen = opts[idx];
+  enterState.m1 = chosen.m1;
+  const used = new Set(chosen.m1);
+  enterState.m2 = [0,1,2,3].filter(i=>!used.has(i));
+  enterState.team = getTeamOptions()[0];
+  renderEnter();
+}
+
+function getMatchOptions() {
+  return [
+    {m1:[0,1],m2:[2,3]},
+    {m1:[0,2],m2:[1,3]},
+    {m1:[0,3],m2:[1,2]},
+  ];
+}
+
+function getTeamOptions() {
+  const [p1,p2] = enterState.m1;
+  const [p3,p4] = enterState.m2;
+  return [
+    `${PLAYERS[p1]}+${PLAYERS[p3]} vs ${PLAYERS[p2]}+${PLAYERS[p4]}`,
+    `${PLAYERS[p1]}+${PLAYERS[p4]} vs ${PLAYERS[p2]}+${PLAYERS[p3]}`,
+  ];
+}
+
+function resetEnterScores() {
+  enterState.pars = Array(18).fill(null);
+  enterState.scores = Array.from({length:18}, () => [null,null,null,null]);
+  enterState.totals = {MTE:null,CJL:null,JDW:null,MJP:null};
+  enterState.ovr_m1 = ''; enterState.ovr_m2 = ''; enterState.ovr_team = '';
+
+  // Pre-fill from existing data if available
+  const year = enterState.year, round = enterState.round;
+  const holeRows = DB.scores.filter(r => +r.Year===year && +r.Round===round).sort((a,b)=>+a.Hole-+b.Hole);
+  if (holeRows.length) {
+    holeRows.forEach((row,h) => {
+      enterState.pars[h] = +row.Par || null;
+      PLAYERS.forEach((p,pi) => { enterState.scores[h][pi] = +row[p] || null; });
+    });
+    const course = holeRows[0].Course || '';
+    enterState.course = course;
+  }
+  const rndRow = DB.rounds.find(r => +r.Year===year && +r.Round===round);
+  if (rndRow) {
+    if (!enterState.course && rndRow.Course) enterState.course = rndRow.Course;
+    PLAYERS.forEach(p => { if (rndRow[p]) enterState.totals[p] = +rndRow[p]; });
+    if (rndRow.M1) {
+      const parts = rndRow.M1.split(' vs ');
+      if (parts.length===2) {
+        enterState.m1 = [PLAYERS.indexOf(parts[0].trim()), PLAYERS.indexOf(parts[1].trim())];
+      }
+    }
+    if (rndRow.M2) {
+      const parts = rndRow.M2.split(' vs ');
+      if (parts.length===2) {
+        enterState.m2 = [PLAYERS.indexOf(parts[0].trim()), PLAYERS.indexOf(parts[1].trim())];
+      }
+    }
+    enterState.team = rndRow.Team || getTeamOptions()[0];
+    enterState.ovr_m1 = rndRow.M1_Result || '';
+    enterState.ovr_m2 = rndRow.M2_Result || '';
+    enterState.ovr_team = rndRow.Team_Result || '';
+  }
+
+  // Pre-fill awards
+  const aw = DB.awards.find(r => +r.Year===year);
+  if (aw) {
+    enterState.awards = { jacket: aw.Jacket||'', stroker: aw.Stroker||'', buddy: aw.Buddy||'', notes: aw.Notes||'' };
+  } else {
+    enterState.awards = { jacket:'', stroker:'', buddy:'', notes:'' };
+  }
+}
+
+function onParInput(hole, val) {
+  enterState.pars[hole] = +val || null;
+  updateTotals();
+  updateMatchStatus();
+}
+
+function onScoreInput(hole, pi, val) {
+  enterState.scores[hole][pi] = +val || null;
+  const input = document.getElementById(`sc-${hole}-${pi}`);
+  if (input) colorInput(input, hole, pi);
+  updateTotals();
+  updateMatchStatus();
+}
+
+function colorInput(input, hole, pi) {
+  const s = enterState.scores[hole][pi];
+  const p = enterState.pars[hole];
+  input.className = 'score-input';
+  if (s && p) {
+    const d = s-p;
+    if (d<=-2) input.classList.add('eagle');
+    else if (d===-1) input.classList.add('birdie');
+    else if (d===1) input.classList.add('bogey');
+    else if (d>=2) input.classList.add('double');
+  }
+}
+
+function recolorAllCells() {
+  for (let h=0; h<18; h++) {
+    for (let pi=0; pi<4; pi++) {
+      const input = document.getElementById(`sc-${h}-${pi}`);
+      if (input) colorInput(input, h, pi);
+    }
+  }
+  updateTotals();
+  updateMatchStatus();
+}
+
+function updateTotals() {
+  const parSum = enterState.pars.reduce((s,p)=>s+(p||0),0);
+  const ptEl = document.getElementById('par-total');
+  if (ptEl) ptEl.textContent = parSum || '—';
+  PLAYERS.forEach((_,pi) => {
+    const sum = enterState.scores.reduce((s,row)=>s+(row[pi]||0),0);
+    const el = document.getElementById(`total-${pi}`);
+    if (el) el.textContent = sum || '—';
+  });
+}
+
+function updateMatchStatus() {
+  const r1 = computeMatchResult(enterState.scores, enterState.m1[0], enterState.m1[1]);
+  const r2 = computeMatchResult(enterState.scores, enterState.m2[0], enterState.m2[1]);
+  const el1 = document.getElementById('status-m1');
+  const el2 = document.getElementById('status-m2');
+  const c1 = document.getElementById('calc-m1');
+  const c2 = document.getElementById('calc-m2');
+  if (el1) { el1.textContent = r1.text; el1.className = 'msp-status '+(r1.winner?'up':'even'); }
+  if (el2) { el2.textContent = r2.text; el2.className = 'msp-status '+(r2.winner?'up':'even'); }
+  if (c1) c1.textContent = r1.text;
+  if (c2) c2.textContent = r2.text;
+}
+
+// ════════════════════════════════════════════════
+//  SAVE
+// ════════════════════════════════════════════════
+let pendingSave = false;
+
+function saveEntry() {
+  const es = enterState;
+  const year = es.year, round = es.round, mode = es.mode;
+
+  const hasExisting =
+    (mode==='hole' && DB.scores.some(r=>+r.Year===year&&+r.Round===round)) ||
+    (mode==='totals' && DB.rounds.some(r=>+r.Year===year&&+r.Round===round)) ||
+    (mode==='awards' && DB.awards.some(r=>+r.Year===year));
+
+  if (hasExisting) {
+    pendingSave = true;
+    document.getElementById('modal-title').textContent = `Overwrite ${gtNum(year)}${mode==='awards'?'':' Round '+round}?`;
+    document.getElementById('modal-body').textContent = `This already has saved data. Saving will replace it.`;
+    document.getElementById('confirm-modal').classList.remove('hidden');
+  } else {
+    doSave();
+  }
+}
+
+function closeModal() {
+  pendingSave = false;
+  document.getElementById('confirm-modal').classList.add('hidden');
+}
+
+function confirmSave() {
+  closeModal();
+  doSave();
+}
+
+async function doSave() {
+  const es = enterState;
+  const btn = document.querySelector('.submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  let payload;
+  if (es.mode === 'hole') {
+    payload = {
+      action: 'saveHoleByHole',
+      year: es.year, round: es.round,
+      course: document.getElementById('sel-course')?.value || es.course || '',
+      pars: es.pars,
+      scores: es.scores,
+      matches: {
+        m1: es.m1, m2: es.m2,
+        team: es.round < 4 ? (document.getElementById('sel-team')?.value || es.team) : null
+      },
+      overrides: { m1: es.ovr_m1, m2: es.ovr_m2, team: es.ovr_team }
+    };
+  } else if (es.mode === 'totals') {
+    const course = document.getElementById('sel-course')?.value || es.course || '';
+    payload = {
+      action: 'saveRoundTotals',
+      year: es.year, round: es.round, course,
+      MTE: es.totals.MTE, CJL: es.totals.CJL, JDW: es.totals.JDW, MJP: es.totals.MJP,
+      m1: es.m1, m1Result: es.ovr_m1,
+      m2: es.m2, m2Result: es.ovr_m2,
+      team: document.getElementById('sel-team')?.value || es.team || '',
+      teamResult: es.ovr_team
+    };
+  } else {
+    payload = {
+      action: 'saveAwards',
+      year: es.year,
+      jacket: es.awards.jacket,
+      stroker: es.awards.stroker,
+      buddy: es.awards.buddy,
+      notes: es.awards.notes
+    };
+  }
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    // Reload data from sheet
+    await fetchData();
+    updateHeader();
+    showToast(`✓ Saved!`, 'success');
+    renderEnter();
+  } catch(e) {
+    showToast('Error saving — check connection', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Save'; }
+  }
+}
+
+// ════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+async function init() {
+  // Show loading state on scores page
+  document.getElementById('page-scores').innerHTML = loading('Loading tournament data…');
+
+  const ok = await fetchData();
+  if (!ok) {
+    document.getElementById('page-scores').innerHTML = `<div class="empty-state">
+      <div class="es-icon">⚠️</div>
+      <div class="es-title">Could not load data</div>
+      <div class="es-sub">Check your internet connection and try refreshing.</div>
+    </div>`;
+    document.getElementById('header-badge').textContent = 'Offline';
+    return;
+  }
+
+  updateHeader();
+  renderScores();
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
