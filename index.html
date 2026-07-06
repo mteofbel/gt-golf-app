@@ -456,9 +456,9 @@ async function fetchData() {
 //  DERIVED DATA HELPERS
 // ════════════════════════════════════════════════
 function currentEventYear() {
-  const allYears = getAllDataYears();
-  if (allYears.includes(CAL_YEAR)) return CAL_YEAR;
-  return allYears.length ? Math.max(...allYears) : CAL_YEAR;
+  // Always treat the current calendar year as the live event year.
+  // Prior years always fall into History, even if they're the only ones with data.
+  return CAL_YEAR;
 }
 
 function getAllDataYears() {
