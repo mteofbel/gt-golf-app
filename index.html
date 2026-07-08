@@ -381,6 +381,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ2shJosBTwjy195IwO
 const GT_START = 2008;
 const CAL_YEAR = new Date().getFullYear();
 const PLAYERS = ['MTE','CJL','JDW','MJP'];
+const COURSE_PARS = {"Chelan Muni": [5, 3, 4, 4, 4, 4, 3, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5, 3], "Desert Canyon": [4, 4, 5, 3, 5, 4, 5, 3, 4, 5, 4, 4, 4, 3, 5, 3, 4, 5], "Gamble Sands - Scarecrow": [4, 3, 5, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 4, 5, 3, 4, 4], "Gamble Sands": [4, 4, 5, 3, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 4, 3, 4, 5], "Highlander": [4, 4, 3, 5, 5, 4, 3, 5, 3, 4, 4, 3, 5, 3, 4, 4, 4, 3], "Bear Mountain": [4, 4, 3, 4, 5, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 4, 3, 5]};
 
 // Award start years (from config tab, these are defaults)
 let CFG = {
@@ -971,16 +972,8 @@ function renderHistory() {
     const minTotal = scoreBoxes.length ? scoreBoxes[0].total : null;
     const maxTotal = scoreBoxes.length ? scoreBoxes[scoreBoxes.length-1].total : null;
 
-    // Award badges
+    // Award badges — order: Stroker, Jacket, Buddy
     let badges = '';
-    if (jacketWinner && showAward('jacket', year)) {
-      const sublabel = jacketIsStroke(year) ? 'Stroke' : 'Match Play';
-      badges += `<div class="award-icon-block jacket">
-        ${jacketImg("2.4rem")}
-        <div class="award-icon-label">Jacket (${sublabel})</div>
-        <div class="award-icon-winner">${jacketWinner}</div>
-      </div>`;
-    }
     if (strokerWinner && showAward('stroker', year) && !jacketIsStroke(year)) {
       badges += `<div class="award-icon-block stroker">
         <div class="award-icon-emoji">🏆</div>
@@ -992,6 +985,14 @@ function renderHistory() {
         <div class="award-icon-emoji">🏆</div>
         <div class="award-icon-label">Low Score</div>
         <div class="award-icon-winner">${strokerWinner}</div>
+      </div>`;
+    }
+    if (jacketWinner && showAward('jacket', year)) {
+      const sublabel = jacketIsStroke(year) ? 'Stroke' : 'Match Play';
+      badges += `<div class="award-icon-block jacket">
+        ${jacketImg("2.4rem")}
+        <div class="award-icon-label">Jacket (${sublabel})</div>
+        <div class="award-icon-winner">${jacketWinner}</div>
       </div>`;
     }
     if (buddyWinner && showAward('buddy', year)) {
@@ -1260,7 +1261,7 @@ function renderEnter() {
         <select class="setup-select" id="sel-round" onchange="onRoundChange(+this.value)">${roundOpts}</select>
       </div>
       <div><div class="setup-label">Course Name</div>
-        <select class="setup-select" id="sel-course" onchange="enterState.course=this.value">
+        <select class="setup-select" id="sel-course" onchange="onCourseChange(this.value)">
           ${buildCourseOptions(es.course)}
         </select>
       </div>
@@ -1466,6 +1467,33 @@ function getSavedTime(year, round, mode) {
 // ════════════════════════════════════════════════
 //  ENTER EVENT HANDLERS
 // ════════════════════════════════════════════════
+function onCourseChange(course) {
+  enterState.course = course;
+  // Auto-fill pars if known and pars haven't been manually entered yet
+  const knownPars = COURSE_PARS[course];
+  if (knownPars) {
+    const anyManualPar = enterState.pars.some(p => p !== null);
+    if (!anyManualPar) {
+      enterState.pars = [...knownPars];
+    } else {
+      // Ask via confirm if pars already entered
+      if (confirm('Pre-fill pars for ' + course + '? This will replace any pars you have already entered.')) {
+        enterState.pars = [...knownPars];
+      }
+    }
+    // Re-render only if in hole-by-hole mode
+    if (enterState.mode === 'hole') {
+      // Update par inputs directly without full re-render
+      for (let h = 0; h < 18; h++) {
+        const el = document.getElementById('par-' + h);
+        if (el) el.value = enterState.pars[h] || '';
+      }
+      updateTotals();
+      updateMatchStatus();
+    }
+  }
+}
+
 function onYearChange(year) {
   enterState.year = year;
   resetEnterScores();
