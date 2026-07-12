@@ -319,7 +319,79 @@
   .modal-btn.cancel{background:var(--bg);color:var(--text);border:1.5px solid var(--border);}
   .modal-btn.confirm{background:var(--gold);color:white;}
 
-  @media(max-width:500px){
+
+  /* SCORES PAGE — expandable round detail */
+  .lb-round-header {
+    display:grid;grid-template-columns:36px 1fr 48px 48px 48px 48px 72px;
+    align-items:center;padding:13px 18px;border-bottom:1px solid var(--border);
+    cursor:pointer;transition:background 0.1s;
+  }
+  .lb-round-header:hover { background:var(--purple-pale); }
+  .lb-round-header.open { background:var(--purple-pale); border-bottom:none; }
+  .lb-round-detail { display:none; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .lb-round-detail.open { display:block; }
+  .nine-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+  .nine-table th { background:var(--purple); color:white; font-family:'Syne',sans-serif;
+    font-size:0.65rem; font-weight:600; padding:6px 5px; text-align:center; white-space:nowrap; }
+  .nine-table th.par-th { background:#1e0045; }
+  .nine-table th.sub-th { background:#3d0085; }
+  .nine-table td { padding:4px 5px; border-bottom:1px solid var(--border); text-align:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.78rem; }
+  .nine-table td.player-col { font-weight:700; font-size:0.78rem; background:#fafafa;
+    text-align:left; padding-left:10px; white-space:nowrap; }
+  .nine-table tr.sub-row td { background:var(--purple-pale); font-weight:700;
+    font-family:'Syne',sans-serif; font-size:0.72rem; }
+  .nine-table tr.total-row td { background:var(--purple); color:white; font-weight:700;
+    font-family:'Syne',sans-serif; font-size:0.78rem; }
+  .nine-table tr.nine-sep td { border-bottom:2px solid var(--purple-mid); }
+  .nine-section-label { background:var(--purple-light); color:var(--purple); font-family:'Syne',sans-serif;
+    font-weight:700; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
+    padding:5px 14px; }
+
+  /* MATCHER — match result display */
+  .match-result-banner { 
+    text-align:center; padding:8px 12px; font-family:'Syne',sans-serif;
+    font-weight:800; font-size:0.9rem; border-radius:8px; margin:6px 0;
+  }
+  .match-result-banner.win { background:var(--green-light); color:var(--green-dark); }
+  .match-result-banner.halved { background:var(--gold-light); color:var(--gold); }
+  .match-result-banner.live { background:var(--purple-pale); color:var(--purple); }
+  .team-result-row { margin-top:8px; padding:8px 12px; background:var(--bg);
+    border-radius:8px; border:1px solid var(--border); font-size:0.82rem; }
+
+  /* TOP 10 */
+  .top10-tabs { display:flex; border-bottom:1px solid var(--border); }
+  .top10-tab { flex:1; padding:12px; text-align:center; font-family:'Syne',sans-serif;
+    font-size:0.85rem; font-weight:700; color:var(--muted); cursor:pointer; background:none;
+    border:none; border-bottom:3px solid transparent; transition:all 0.15s; }
+  .top10-tab.active { color:var(--purple); border-bottom-color:var(--purple); }
+  .top10-item { display:flex; align-items:flex-start; gap:10px; padding:14px 18px;
+    border-bottom:1px solid var(--border); }
+  .top10-item:last-child { border-bottom:none; }
+  .top10-rank { font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem;
+    color:var(--purple-light); min-width:28px; text-align:center; padding-top:2px; }
+  .top10-rank.in { color:var(--purple); }
+  .top10-text { flex:1; font-size:0.9rem; line-height:1.5; }
+  .top10-handle { cursor:grab; color:var(--border); font-size:1.1rem; padding-top:2px;
+    display:flex; flex-direction:column; gap:2px; user-select:none; }
+  .top10-handle:active { cursor:grabbing; }
+  .top10-handle span { width:18px; height:2px; background:var(--muted); border-radius:2px; display:block; }
+  .top10-delete { color:#fca5a5; font-size:0.8rem; cursor:pointer; padding:2px 6px;
+    border-radius:6px; border:none; background:none; margin-top:2px; }
+  .top10-delete:hover { background:#fee2e2; color:var(--red); }
+  .top10-add-btn { width:100%; padding:14px; background:none; border:2px dashed var(--border);
+    border-radius:12px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem;
+    color:var(--muted); cursor:pointer; margin-top:4px; transition:all 0.15s; }
+  .top10-add-btn:hover { border-color:var(--purple); color:var(--purple); background:var(--purple-pale); }
+  .top10-divider { text-align:center; padding:8px; font-size:0.72rem; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);
+    background:var(--bg); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .top10-item.dragging { opacity:0.4; background:var(--purple-pale); }
+  .top10-item.drag-over { border-top:2px solid var(--purple); }
+  .top10-lock-screen { display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:40px 20px; }
+
+  @media(max-width:500px){  @media(max-width:500px){
     .lb-header,.lb-row{grid-template-columns:30px 1fr 38px 38px 38px 38px 58px;padding:10px 12px;}
     .setup-2col{grid-template-columns:1fr;}
     .awards-grid{grid-template-columns:1fr;}
@@ -338,6 +410,7 @@
     <button onclick="showPage('matcher')">Matcher</button>
     <button onclick="showPage('jacket')">Jacket</button>
     <button onclick="showPage('history')">History</button>
+    <button onclick="showPage('top10')">Top 10</button>
     <button onclick="showPage('enter')">Enter</button>
   </nav>
 </header>
@@ -347,6 +420,7 @@
   <div id="page-matcher" class="page"></div>
   <div id="page-jacket" class="page"></div>
   <div id="page-history" class="page"></div>
+  <div id="page-top10" class="page"></div>
   <div id="page-enter" class="page"></div>
 </main>
 
@@ -618,6 +692,39 @@ function computeMatchResult(holeScores, p1idx, p2idx) {
   return { text:`${winner} ${lead} Up (thru ${holes})`, short:`${lead} Up`, winner, loser };
 }
 
+// Compute team best-ball match result from hole scores
+function computeTeamMatchResult(holeScores, teamStr) {
+  if (!holeScores || !teamStr) return '';
+  const parts = teamStr.split(' vs ');
+  if (parts.length !== 2) return '';
+  const t1names = parts[0].trim().split('+').map(s=>s.trim());
+  const t2names = parts[1].trim().split('+').map(s=>s.trim());
+  const t1idx = t1names.map(n=>PLAYERS.indexOf(n)).filter(i=>i>=0);
+  const t2idx = t2names.map(n=>PLAYERS.indexOf(n)).filter(i=>i>=0);
+  if (!t1idx.length || !t2idx.length) return '';
+
+  let t1up = 0, holes = 0;
+  for (let h=0; h<18; h++) {
+    const best1 = t1idx.reduce((b,i) => holeScores[h][i] ? Math.min(b, holeScores[h][i]) : b, 99);
+    const best2 = t2idx.reduce((b,i) => holeScores[h][i] ? Math.min(b, holeScores[h][i]) : b, 99);
+    if (best1 < 99 && best2 < 99) {
+      holes++;
+      if (best1 < best2) t1up++;
+      else if (best2 < best1) t1up--;
+    }
+  }
+  if (holes === 0) return 'All Square (thru 0)';
+  const remaining = 18 - holes;
+  const lead = Math.abs(t1up);
+  if (t1up === 0) return holes===18 ? 'Halved' : `All Square (thru ${holes})`;
+  const winTeam = t1up>0 ? t1names.join('+') : t2names.join('+');
+  if (lead > remaining) {
+    const margin = remaining===0 ? `${lead} Up` : `${lead}&${remaining}`;
+    return `${winTeam} wins ${margin}`;
+  }
+  return `${winTeam} ${lead} Up (thru ${holes})`;
+}
+
 // Compute jacket standings for a year (2023+)
 function computeJacketStandings(year) {
   const records = PLAYERS.map(name => ({ name, wins:0, losses:0, pts:0 }));
@@ -678,7 +785,7 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const idx = ['scores','matcher','jacket','history','enter'].indexOf(id);
+  const idx = ['scores','matcher','jacket','history','top10','enter'].indexOf(id);
   document.querySelectorAll('nav button')[idx].classList.add('active');
   currentPage = id;
   window.scrollTo(0,0);
@@ -690,6 +797,7 @@ function renderPage(id) {
   else if (id==='matcher') renderMatcher();
   else if (id==='jacket') renderJacket();
   else if (id==='history') renderHistory();
+  else if (id==='top10') { fetchData().then(renderTop10); }
   else if (id==='enter') renderEnter();
 }
 
@@ -759,6 +867,42 @@ function renderScores() {
       <span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>Total</span>
     </div>`;
 
+    // Round headers (clickable to expand hole-by-hole)
+    const completedRoundNums = [...doneRounds].sort();
+    completedRoundNums.forEach(r => {
+      const pars = getRoundPars(year, r);
+      const holeScores = getHoleScores(year, r);
+      const course = getCourseName(year, r);
+      const roundLabel = r===4 ? `R4 ${jacketImg('0.85rem')}` : `Round ${r}`;
+      const hasDetail = !!(pars && holeScores);
+
+      // Per-player totals for this round
+      const rTotals = PLAYERS.map(p => {
+        const rts = getRoundTotals(year, p);
+        return rts[r-1];
+      });
+      const parSum = pars ? pars.reduce((a,b)=>a+(b||0),0) : null;
+
+      html += `<div class="lb-round-header ${hasDetail?'':'no-detail'}"
+        onclick="${hasDetail?`toggleScoreDetail(${r})`:'void(0)'}"
+        style="${hasDetail?'':'cursor:default;'}">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;
+          color:var(--purple);grid-column:1/3;display:flex;align-items:center;gap:6px;">
+          ${roundLabel}
+          ${course?`<span style="font-size:0.7rem;font-weight:400;color:var(--muted);">· ${course}</span>`:''}
+          ${hasDetail?`<span style="font-size:0.65rem;color:var(--muted);">▼</span>`:''}
+        </div>
+        ${rTotals.map(t => `<div class="lb-r">${t??'—'}</div>`).join('')}
+        <div class="lb-total">${parSum??'—'}</div>
+      </div>
+      <div class="lb-round-detail" id="detail-r${r}">
+        ${hasDetail ? buildScoreGrid(pars, holeScores, r) : ''}
+      </div>`;
+    });
+
+    html += `<div style="height:1px;background:var(--border);margin:0 18px;"></div>`;
+
+    // Player leaderboard rows
     lbData.forEach((p, i) => {
       const isFirst = i===0 && p.total!==null;
       const isLast = i===lbData.length-1 && p.total!==null;
@@ -780,6 +924,100 @@ function renderScores() {
 
   html += `</div>`;
   document.getElementById('page-scores').innerHTML = html;
+}
+
+function toggleScoreDetail(r) {
+  const header = document.querySelector(`[onclick="toggleScoreDetail(${r})"]`);
+  const detail = document.getElementById(`detail-r${r}`);
+  if (!detail) return;
+  const isOpen = detail.classList.contains('open');
+  detail.classList.toggle('open', !isOpen);
+  if (header) header.classList.toggle('open', !isOpen);
+  const chev = header?.querySelector('span:last-child');
+  if (chev) chev.textContent = isOpen ? '▼' : '▲';
+}
+
+function buildScoreGrid(pars, holeScores, roundNum) {
+  // Rows = players, Cols = holes. Front 9 then back 9.
+  const front = Array.from({length:9}, (_,i) => i);
+  const back  = Array.from({length:9}, (_,i) => i+9);
+  const frontPar = front.reduce((s,h) => s+(pars[h]||0), 0);
+  const backPar  = back.reduce((s,h) => s+(pars[h]||0), 0);
+
+  function cellCls(score, par) {
+    if (!score||!par) return '';
+    const d=score-par;
+    if(d<=-2) return 'sc-eagle'; if(d===-1) return 'sc-birdie';
+    if(d===1) return 'sc-bogey'; if(d>=2) return 'sc-double';
+    return '';
+  }
+
+  function buildNine(holes, parTotal, label) {
+    const holeNums = holes.map(h=>h+1);
+    let t = `<div class="nine-section-label">${label}</div>`;
+    t += `<table class="nine-table"><thead><tr>
+      <th style="text-align:left;padding-left:10px;">Golfer</th>
+      ${holeNums.map(n=>`<th>${n}</th>`).join('')}
+      <th class="sub-th">Sub</th>
+    </tr>
+    <tr>
+      <th class="par-th" style="text-align:left;padding-left:10px;">Par</th>
+      ${holes.map(h=>`<th class="par-th">${pars[h]||'—'}</th>`).join('')}
+      <th class="sub-th">${parTotal}</th>
+    </tr></thead><tbody>`;
+
+    PLAYERS.forEach(p => {
+      const pi = PLAYERS.indexOf(p);
+      const sub = holes.reduce((s,h) => s+(holeScores[h][pi]||0), 0);
+      t += `<tr><td class="player-col">${p}</td>
+        ${holes.map(h => {
+          const sc = holeScores[h][pi];
+          return `<td class="${cellCls(sc,pars[h])}">${sc||'—'}</td>`;
+        }).join('')}
+        <td class="${cellCls(sub,parTotal)}">${sub||'—'}</td>
+      </tr>`;
+    });
+
+    t += `</tbody></table>`;
+    return t;
+  }
+
+  // Back nine section ends with total row
+  let html = buildNine(front, frontPar, 'Front Nine');
+
+  // Back nine + total
+  const holeNums = back.map(h=>h+1);
+  html += `<div class="nine-section-label">Back Nine</div>
+  <table class="nine-table"><thead><tr>
+    <th style="text-align:left;padding-left:10px;">Golfer</th>
+    ${holeNums.map(n=>`<th>${n}</th>`).join('')}
+    <th class="sub-th">Sub</th>
+    <th class="sub-th">Total</th>
+  </tr>
+  <tr>
+    <th class="par-th" style="text-align:left;padding-left:10px;">Par</th>
+    ${back.map(h=>`<th class="par-th">${pars[h]||'—'}</th>`).join('')}
+    <th class="sub-th">${backPar}</th>
+    <th class="sub-th">${frontPar+backPar}</th>
+  </tr></thead><tbody>`;
+
+  PLAYERS.forEach(p => {
+    const pi = PLAYERS.indexOf(p);
+    const frontSub = front.reduce((s,h) => s+(holeScores[h][pi]||0), 0);
+    const backSub  = back.reduce((s,h)  => s+(holeScores[h][pi]||0), 0);
+    const total = frontSub + backSub;
+    html += `<tr><td class="player-col">${p}</td>
+      ${back.map(h => {
+        const sc = holeScores[h][pi];
+        return `<td class="${cellCls(sc,pars[h])}">${sc||'—'}</td>`;
+      }).join('')}
+      <td>${backSub||'—'}</td>
+      <td style="font-weight:700;">${total||'—'}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  return html;
 }
 
 // ════════════════════════════════════════════════
@@ -812,7 +1050,7 @@ function renderMatcher() {
 
     html += `<div class="match-block"><div class="match-type" ${labelColor}>${label}</div>`;
 
-    const renderMatch = (matchStr, resultStr) => {
+    const renderMatchVersus = (matchStr, resultStr) => {
       if (!matchStr) return '';
       const parts = matchStr.split(' vs ');
       if (parts.length !== 2) return '';
@@ -822,36 +1060,59 @@ function renderMatcher() {
       let res;
       if (resultStr) {
         const halved = resultStr.toLowerCase().includes('halved') || resultStr.toLowerCase().includes('all square');
-        const win1 = !halved && (resultStr.startsWith(p1n) || (resultStr.includes(p1n) && !resultStr.includes(p2n+'win')));
-        const win2 = !halved && resultStr.startsWith(p2n);
-        res = { winner: win1 ? p1n : win2 ? p2n : null, halved, text: resultStr };
+        const win1 = !halved && resultStr.toLowerCase().startsWith(p1n.toLowerCase());
+        const win2 = !halved && resultStr.toLowerCase().startsWith(p2n.toLowerCase());
+        res = { winner: win1?p1n:win2?p2n:null, halved, text:resultStr, short:resultStr };
       } else if (holeScores && p1i>=0 && p2i>=0) {
         res = computeMatchResult(holeScores, p1i, p2i);
       } else {
-        res = { text:'—', winner:null };
+        res = { text:'—', winner:null, short:'—' };
       }
 
       const p1win = res.winner===p1n, p2win = res.winner===p2n;
-      const halved = res.halved || (!res.winner && res.text?.toLowerCase().includes('halved'));
+      const halved = res.halved || res.text?.toLowerCase().includes('halved');
+      const live = !p1win && !p2win && !halved && res.text !== '—';
+
+      // Result banner text
+      let bannerText = '', bannerCls = '';
+      if (halved) { bannerText = 'Halved'; bannerCls = 'halved'; }
+      else if (p1win || p2win) {
+        const w = p1win?p1n:p2n, l = p1win?p2n:p1n;
+        // Extract margin from short (e.g. "3&2", "1 Up")
+        const margin = res.short && res.short !== '—' ? res.short : '';
+        bannerText = margin ? `${w} wins ${margin}` : `${w} wins`;
+        bannerCls = 'win';
+      } else if (live) {
+        bannerText = res.text;
+        bannerCls = 'live';
+      }
 
       return `<div class="match-versus">
         <div class="match-player-box ${p1win?'winner':p2win?'loser':halved?'halved':''}">
           <div class="mpb-name">${p1n}</div>
-          <div class="mpb-result ${p2win?'loss':halved?'halved-text':''}">${p1win?'W':''}${halved?'Halved':''}${p2win?'L':''} ${res.text&&!p1win&&!p2win&&!halved?res.text:''}</div>
+          <div class="mpb-result ${p2win?'loss':halved?'halved-text':''}">${p1win?'✓':p2win?'✗':halved?'½':''}</div>
         </div>
-        <div class="versus-divider">vs</div>
+        <div style="flex:0;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div class="versus-divider">vs</div>
+          ${bannerText?`<div class="match-result-banner ${bannerCls}">${bannerText}</div>`:''}
+        </div>
         <div class="match-player-box ${p2win?'winner':p1win?'loser':halved?'halved':''}">
           <div class="mpb-name">${p2n}</div>
-          <div class="mpb-result ${p1win?'loss':halved?'halved-text':''}">${p2win?'W':''}${halved?'Halved':''}${p1win?'L':''}</div>
+          <div class="mpb-result ${p1win?'loss':halved?'halved-text':''}">${p2win?'✓':p1win?'✗':halved?'½':''}</div>
         </div>
       </div>`;
     };
 
-    html += renderMatch(mi.m1, mi.m1Result);
-    html += `<div style="margin-top:8px;">` + renderMatch(mi.m2, mi.m2Result) + `</div>`;
+    html += renderMatchVersus(mi.m1, mi.m1Result);
+    html += `<div style="margin-top:8px;">` + renderMatchVersus(mi.m2, mi.m2Result) + `</div>`;
 
     if (mi.team && r < 4) {
-      html += `<div class="team-note">🏌 Team: ${mi.team}${mi.teamResult?' · '+mi.teamResult:''}</div>`;
+      // Compute team match result
+      let teamResultText = mi.teamResult || '';
+      if (!teamResultText && holeScores) {
+        teamResultText = computeTeamMatchResult(holeScores, mi.team);
+      }
+      html += `<div class="team-result-row">🏌 Team · <strong>${mi.team}</strong>${teamResultText?' · <span style="color:var(--green-dark);font-weight:700;">'+teamResultText+'</span>':''}</div>`;
     }
     html += `</div>`;
   });
@@ -1131,6 +1392,190 @@ function buildMatchSummary(mi) {
   if (mi.team) html += `<div style="padding:4px 14px 10px;font-size:0.8rem;color:var(--muted);">
     🏌 Team: ${mi.team}${mi.teamResult?' · '+mi.teamResult:''}</div>`;
   return html;
+}
+
+// ════════════════════════════════════════════════
+//  TOP 10 PAGE
+// ════════════════════════════════════════════════
+let top10Tab = 'quotes'; // quotes | memories
+let top10Unlocked = false;
+let top10DragSrc = null;
+
+function loadTop10Data() {
+  // Build from DB.top10 which is loaded from Google Sheets
+  const data = { quotes: [], memories: [] };
+  if (!DB.top10) return data;
+  const quotes   = DB.top10.filter(r => String(r.Type).toLowerCase() === 'quotes')
+                            .sort((a,b) => +a.Rank - +b.Rank)
+                            .map(r => String(r.Text));
+  const memories = DB.top10.filter(r => String(r.Type).toLowerCase() === 'memories')
+                            .sort((a,b) => +a.Rank - +b.Rank)
+                            .map(r => String(r.Text));
+  return { quotes, memories };
+}
+
+async function saveTop10Data(data, type) {
+  // Save just the changed type back to Google Sheets
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'saveTop10',
+        type: type,
+        items: data[type]
+      })
+    });
+    // Refresh DB from sheet
+    await fetchData();
+  } catch(e) {
+    showToast('Error saving — check connection', 'error');
+  }
+}
+
+function renderTop10() {
+  const data = loadTop10Data();
+  const items = data[top10Tab] || [];
+
+  let html = `<div class="card">
+    <div class="top10-tabs">
+      <button class="top10-tab ${top10Tab==='quotes'?'active':''}" onclick="switchTop10Tab('quotes')">💬 Top Quotes</button>
+      <button class="top10-tab ${top10Tab==='memories'?'active':''}" onclick="switchTop10Tab('memories')">⭐ Top Memories</button>
+    </div>`;
+
+  if (!items.length) {
+    html += `<div class="empty-state"><div class="es-icon">${top10Tab==='quotes'?'💬':'⭐'}</div>
+      <div class="es-title">No ${top10Tab} yet</div>
+      <div class="es-sub">Add the first one below.</div></div>`;
+  } else {
+    const top10 = items.slice(0, 10);
+    const rest  = items.slice(10);
+
+    top10.forEach((item, i) => {
+      html += renderTop10Item(item, i, true, top10Unlocked);
+    });
+
+    if (top10Unlocked && rest.length) {
+      html += `<div class="top10-divider">— Outside Top 10 —</div>`;
+      rest.forEach((item, i) => {
+        html += renderTop10Item(item, i+10, false, true);
+      });
+    }
+  }
+
+  if (top10Unlocked) {
+    html += `<div style="padding:14px 18px;">
+      <button class="top10-add-btn" onclick="addTop10Item()">+ Add ${top10Tab==='quotes'?'Quote':'Memory'}</button>
+    </div>`;
+  } else {
+    html += `<div style="padding:14px 18px;">
+      <button class="top10-add-btn" onclick="unlockTop10()">🔒 Edit / Add</button>
+    </div>`;
+  }
+
+  html += `</div>`;
+  document.getElementById('page-top10').innerHTML = html;
+
+  // Re-attach drag events
+  if (top10Unlocked) attachDragEvents();
+}
+
+function renderTop10Item(text, idx, inTop10, editable) {
+  const rank = idx + 1;
+  return `<div class="top10-item" draggable="${editable}" data-idx="${idx}"
+    ondragstart="top10DragStart(event,${idx})"
+    ondragover="top10DragOver(event)"
+    ondrop="top10Drop(event,${idx})"
+    ondragend="top10DragEnd(event)">
+    <div class="top10-rank ${inTop10?'in':''}">${rank}</div>
+    <div class="top10-text">${escHtml(text)}</div>
+    ${editable ? `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div class="top10-handle" title="Drag to reorder">
+          <span></span><span></span><span></span>
+        </div>
+        <button class="top10-delete" onclick="deleteTop10Item(${idx})" title="Delete">✕</button>
+      </div>` : ''}
+  </div>`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function switchTop10Tab(tab) {
+  top10Tab = tab;
+  renderTop10();
+}
+
+function unlockTop10() {
+  const pw = prompt('Enter password to edit:');
+  if (pw === ENTER_PASSWORD) {
+    top10Unlocked = true;
+    renderTop10();
+  } else if (pw !== null) {
+    showToast('Incorrect password', 'error');
+  }
+}
+
+async function addTop10Item() {
+  const type = top10Tab === 'quotes' ? 'quote' : 'memory';
+  const text = prompt(`Enter new ${type}:`);
+  if (!text || !text.trim()) return;
+  const data = loadTop10Data();
+  data[top10Tab].push(text.trim());
+  showToast('Saving…');
+  await saveTop10Data(data, top10Tab);
+  renderTop10();
+  showToast('Saved!', 'success');
+}
+
+async function deleteTop10Item(idx) {
+  if (!confirm('Delete this item?')) return;
+  const data = loadTop10Data();
+  data[top10Tab].splice(idx, 1);
+  showToast('Saving…');
+  await saveTop10Data(data, top10Tab);
+  renderTop10();
+  showToast('Deleted', 'success');
+}
+
+// Drag and drop reordering
+function top10DragStart(e, idx) {
+  top10DragSrc = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function top10DragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.top10-item').forEach(el => el.classList.remove('drag-over'));
+  e.currentTarget.closest('.top10-item')?.classList.add('drag-over');
+}
+
+async function top10Drop(e, targetIdx) {
+  e.preventDefault();
+  if (top10DragSrc === null || top10DragSrc === targetIdx) return;
+  const data = loadTop10Data();
+  const items = data[top10Tab];
+  const [moved] = items.splice(top10DragSrc, 1);
+  items.splice(targetIdx, 0, moved);
+  top10DragSrc = null;
+  showToast('Saving…');
+  await saveTop10Data(data, top10Tab);
+  renderTop10();
+  showToast('Order saved!', 'success');
+}
+
+function top10DragEnd(e) {
+  top10DragSrc = null;
+  document.querySelectorAll('.top10-item').forEach(el => {
+    el.classList.remove('dragging','drag-over');
+  });
+}
+
+function attachDragEvents() {
+  // Events are attached inline via HTML attributes above, nothing extra needed
 }
 
 // ════════════════════════════════════════════════
