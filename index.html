@@ -86,12 +86,20 @@
   .match-block:last-child{border-bottom:none;}
   .match-type{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
     color:var(--muted);margin-bottom:10px;}
-  .match-versus{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
-  .match-player-box{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);transition:all 0.15s;}
+  .match-versus{display:flex;align-items:stretch;gap:8px;margin-bottom:6px;}
+  .match-player-box{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);
+    transition:all 0.15s;min-width:0;}
+  .match-vs-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:4px;min-width:36px;}
   .match-player-box.winner{border-color:var(--green);background:var(--green-light);}
   .match-player-box.loser{opacity:0.5;}
   .match-player-box.halved{border-color:var(--gold);background:var(--gold-light);}
+  .mpb-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .mpb-name{font-weight:700;font-size:0.95rem;}
+  .mpb-icon{font-size:1.5rem;font-weight:800;line-height:1;min-width:1.6rem;text-align:right;}
+  .mpb-icon.win{color:var(--green-dark);}
+  .mpb-icon.loss{color:var(--muted);opacity:0.5;}
+  .mpb-icon.halved-text{color:var(--gold);}
   .mpb-result{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;margin-top:3px;
     color:var(--green-dark);font-weight:600;}
   .mpb-result.loss{color:var(--muted);}
@@ -132,7 +140,9 @@
   .award-icon-block.stroker{background:var(--green-light);}
   .award-icon-block.buddy{background:#fee2e2;}
   .award-icon-block.played{background:var(--bg);border:1px solid var(--border);}
-  .award-icon-emoji{font-size:2.2rem;line-height:1;}
+  .award-icon-img{width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;}
+  .award-icon-img img{width:100%;height:100%;object-fit:contain;}
+  .award-icon-emoji{font-size:2.2rem;line-height:1;height:2.4rem;display:flex;align-items:center;}
   .award-icon-label{font-size:0.62rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);}
   .award-icon-winner{font-family:'Syne',sans-serif;font-weight:800;font-size:0.85rem;}
   .award-icon-block.jacket .award-icon-winner{color:var(--purple);}
@@ -862,45 +872,27 @@ function renderScores() {
     });
     const totalPar = parByRound.filter(p=>p!==null).reduce((a,b)=>a+b,0) || null;
 
-    html += `<div class="lb-header">
-      <span></span><span>Golfer</span>
-      <span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>Total</span>
-    </div>`;
-
-    // Round headers (clickable to expand hole-by-hole)
+    // Column header — R1/R2/R3/R4 are clickable if hole data exists
     const completedRoundNums = [...doneRounds].sort();
+    const hasDetailByRound = {};
     completedRoundNums.forEach(r => {
-      const pars = getRoundPars(year, r);
-      const holeScores = getHoleScores(year, r);
-      const course = getCourseName(year, r);
-      const roundLabel = r===4 ? `R4 ${jacketImg('0.85rem')}` : `Round ${r}`;
-      const hasDetail = !!(pars && holeScores);
-
-      // Per-player totals for this round
-      const rTotals = PLAYERS.map(p => {
-        const rts = getRoundTotals(year, p);
-        return rts[r-1];
-      });
-      const parSum = pars ? pars.reduce((a,b)=>a+(b||0),0) : null;
-
-      html += `<div class="lb-round-header ${hasDetail?'':'no-detail'}"
-        onclick="${hasDetail?`toggleScoreDetail(${r})`:'void(0)'}"
-        style="${hasDetail?'':'cursor:default;'}">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;
-          color:var(--purple);grid-column:1/3;display:flex;align-items:center;gap:6px;">
-          ${roundLabel}
-          ${course?`<span style="font-size:0.7rem;font-weight:400;color:var(--muted);">· ${course}</span>`:''}
-          ${hasDetail?`<span style="font-size:0.65rem;color:var(--muted);">▼</span>`:''}
-        </div>
-        ${rTotals.map(t => `<div class="lb-r">${t??'—'}</div>`).join('')}
-        <div class="lb-total">${parSum??'—'}</div>
-      </div>
-      <div class="lb-round-detail" id="detail-r${r}">
-        ${hasDetail ? buildScoreGrid(pars, holeScores, r) : ''}
-      </div>`;
+      hasDetailByRound[r] = !!(getRoundPars(year, r) && getHoleScores(year, r));
     });
 
-    html += `<div style="height:1px;background:var(--border);margin:0 18px;"></div>`;
+    function rHeader(r) {
+      const label = r===4 ? `R4` : `R${r}`;
+      if (hasDetailByRound[r]) {
+        return `<span style="cursor:pointer;color:var(--purple);text-decoration:underline dotted;"
+          onclick="toggleScoreDetail(${r})">${label} ▾</span>`;
+      }
+      return `<span>${label}</span>`;
+    }
+
+    html += `<div class="lb-header">
+      <span></span><span>Golfer</span>
+      ${[1,2,3,4].map(r => `<span>${doneRounds.has(r)?rHeader(r):`<span style="color:#ccc;">R${r}</span>`}</span>`).join('')}
+      <span>Total</span>
+    </div>`;
 
     // Player leaderboard rows
     lbData.forEach((p, i) => {
@@ -918,6 +910,24 @@ function renderScores() {
         <div class="lb-name">${p.name}${chip}${buddyMark}</div>
         ${rCells}
         <div class="lb-total ${isFirst?'leader':''}">${p.total!==null?p.total:'—'}</div>
+      </div>`;
+    });
+
+    // Expandable round detail panels — sit below the player rows
+    completedRoundNums.forEach(r => {
+      if (!hasDetailByRound[r]) return;
+      const pars = getRoundPars(year, r);
+      const holeScores = getHoleScores(year, r);
+      const course = getCourseName(year, r);
+      const roundLabel = r===4 ? `Round 4 ${jacketImg('0.85rem')}` : `Round ${r}`;
+      html += `<div class="lb-round-detail" id="detail-r${r}">
+        <div style="padding:8px 14px;background:var(--purple-pale);font-family:'Syne',sans-serif;
+          font-weight:700;font-size:0.78rem;color:var(--purple);display:flex;align-items:center;
+          justify-content:space-between;">
+          <span>${roundLabel}${course?' · <span style="font-weight:400;color:var(--muted);">'+course+'</span>':''}</span>
+          <span style="cursor:pointer;font-size:0.7rem;" onclick="toggleScoreDetail(${r})">✕ Close</span>
+        </div>
+        ${buildScoreGrid(pars, holeScores, r)}
       </div>`;
     });
   }
@@ -1089,16 +1099,20 @@ function renderMatcher() {
 
       return `<div class="match-versus">
         <div class="match-player-box ${p1win?'winner':p2win?'loser':halved?'halved':''}">
-          <div class="mpb-name">${p1n}</div>
-          <div class="mpb-result ${p2win?'loss':halved?'halved-text':''}">${p1win?'✓':p2win?'✗':halved?'½':''}</div>
+          <div class="mpb-inner">
+            <div class="mpb-name">${p1n}</div>
+            <div class="mpb-icon ${p1win?'win':p2win?'loss':halved?'halved-text':''}">${p1win?'✓':p2win?'✗':halved?'½':live?'…':''}</div>
+          </div>
         </div>
-        <div style="flex:0;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div class="match-vs-col">
           <div class="versus-divider">vs</div>
           ${bannerText?`<div class="match-result-banner ${bannerCls}">${bannerText}</div>`:''}
         </div>
         <div class="match-player-box ${p2win?'winner':p1win?'loser':halved?'halved':''}">
-          <div class="mpb-name">${p2n}</div>
-          <div class="mpb-result ${p1win?'loss':halved?'halved-text':''}">${p2win?'✓':p1win?'✗':halved?'½':''}</div>
+          <div class="mpb-inner">
+            <div class="mpb-name">${p2n}</div>
+            <div class="mpb-icon ${p2win?'win':p1win?'loss':halved?'halved-text':''}">${p2win?'✓':p1win?'✗':halved?'½':live?'…':''}</div>
+          </div>
         </div>
       </div>`;
     };
@@ -1112,7 +1126,37 @@ function renderMatcher() {
       if (!teamResultText && holeScores) {
         teamResultText = computeTeamMatchResult(holeScores, mi.team);
       }
-      html += `<div class="team-result-row">🏌 Team · <strong>${mi.team}</strong>${teamResultText?' · <span style="color:var(--green-dark);font-weight:700;">'+teamResultText+'</span>':''}</div>`;
+      // Parse team match same way as individual
+      const tparts = mi.team.split(' vs ');
+      const t1n = tparts[0]?.trim() || '', t2n = tparts[1]?.trim() || '';
+      let tWin1=false, tWin2=false, tHalved=false, tLive=false;
+      if (teamResultText) {
+        tHalved = teamResultText.toLowerCase().includes('halved') || teamResultText.toLowerCase().includes('all square');
+        tWin1 = !tHalved && teamResultText.toLowerCase().startsWith(t1n.toLowerCase().split('+')[0]);
+        tWin2 = !tHalved && !tWin1 && teamResultText.length > 0;
+      } else { tLive = true; }
+      let tBannerText='', tBannerCls='';
+      if (tHalved) { tBannerText='Halved'; tBannerCls='halved'; }
+      else if (tWin1||tWin2) { tBannerText=teamResultText; tBannerCls='win'; }
+      else if (tLive && teamResultText) { tBannerText=teamResultText; tBannerCls='live'; }
+      html += `<div class="match-versus" style="margin-top:8px;">
+        <div class="match-player-box ${tWin1?'winner':tWin2?'loser':tHalved?'halved':''}">
+          <div class="mpb-inner">
+            <div style="font-weight:700;font-size:0.88rem;">🏌 ${t1n}</div>
+            <div class="mpb-icon ${tWin1?'win':tWin2?'loss':tHalved?'halved-text':''}">${tWin1?'✓':tWin2?'✗':tHalved?'½':''}</div>
+          </div>
+        </div>
+        <div class="match-vs-col">
+          <div class="versus-divider">vs</div>
+          ${tBannerText?`<div class="match-result-banner ${tBannerCls}">${tBannerText}</div>`:''}
+        </div>
+        <div class="match-player-box ${tWin2?'winner':tWin1?'loser':tHalved?'halved':''}">
+          <div class="mpb-inner">
+            <div style="font-weight:700;font-size:0.88rem;">🏌 ${t2n}</div>
+            <div class="mpb-icon ${tWin2?'win':tWin1?'loss':tHalved?'halved-text':''}">${tWin2?'✓':tWin1?'✗':tHalved?'½':''}</div>
+          </div>
+        </div>
+      </div>`;
     }
     html += `</div>`;
   });
@@ -1251,14 +1295,14 @@ function renderHistory() {
     if (jacketWinner && showAward('jacket', year)) {
       const sublabel = jacketIsStroke(year) ? 'Stroke' : 'Match Play';
       badges += `<div class="award-icon-block jacket">
-        ${jacketImg("2.4rem")}
+        <div class="award-icon-img">${jacketImg("2.4rem")}</div>
         <div class="award-icon-label">Jacket (${sublabel})</div>
         <div class="award-icon-winner">${jacketWinner}</div>
       </div>`;
     }
     if (buddyWinner && showAward('buddy', year)) {
       badges += `<div class="award-icon-block buddy">
-        ${buddyImg("2.4rem")}
+        <div class="award-icon-img">${buddyImg("2.4rem", false)}</div>
         <div class="award-icon-label">Buddy</div>
         <div class="award-icon-winner">${buddyWinner}</div>
       </div>`;
