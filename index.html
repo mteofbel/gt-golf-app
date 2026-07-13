@@ -1274,17 +1274,19 @@ function renderHistory() {
 
     // Award badges — order: Stroker, Jacket, Buddy
     let badges = '';
-    if (strokerWinner && showAward('stroker', year) && !jacketIsStroke(year)) {
+    // Stroker: show for 2012+ always; 2009-2011 as Low Score; 2020-2022 show even though same winner as Jacket
+    const strokerDisplay = strokerWinner || (jacketIsStroke(year) ? jacketWinner : '');
+    if (strokerDisplay && showAward('stroker', year)) {
       badges += `<div class="award-icon-block stroker">
         <div class="award-icon-emoji">🏆</div>
         <div class="award-icon-label">Stroker</div>
-        <div class="award-icon-winner">${strokerWinner}</div>
+        <div class="award-icon-winner">${strokerDisplay}</div>
       </div>`;
-    } else if (year >= 2009 && year <= 2011 && strokerWinner) {
+    } else if (year >= 2009 && year <= 2011 && strokerDisplay) {
       badges += `<div class="award-icon-block stroker">
         <div class="award-icon-emoji">🏆</div>
         <div class="award-icon-label">Low Score</div>
-        <div class="award-icon-winner">${strokerWinner}</div>
+        <div class="award-icon-winner">${strokerDisplay}</div>
       </div>`;
     }
     if (jacketWinner && showAward('jacket', year)) {
