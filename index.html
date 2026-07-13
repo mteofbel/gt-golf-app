@@ -86,25 +86,24 @@
   .match-block:last-child{border-bottom:none;}
   .match-type{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
     color:var(--muted);margin-bottom:10px;}
-  .match-versus{display:flex;align-items:stretch;gap:8px;margin-bottom:6px;}
-  .match-player-box{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);
+  /* Three equal columns: player | result | player */
+  .match-versus{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;align-items:stretch;}
+  .match-player-box{padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);
     transition:all 0.15s;min-width:0;}
-  .match-vs-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:4px;min-width:36px;}
+  .match-result-col{padding:8px 10px;border-radius:10px;border:1.5px solid transparent;
+    display:flex;align-items:center;justify-content:center;text-align:center;}
   .match-player-box.winner{border-color:var(--green);background:var(--green-light);}
-  .match-player-box.loser{opacity:0.5;}
-  .match-player-box.halved{border-color:var(--gold);background:var(--gold-light);}
-  .mpb-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .match-player-box.loser{border-color:#fca5a5;background:#fee2e2;}
+  .match-player-box.push{border-color:#93c5fd;background:#eff6ff;}
+  .mpb-inner{display:flex;align-items:center;justify-content:space-between;gap:6px;}
   .mpb-name{font-weight:700;font-size:0.95rem;}
-  .mpb-icon{font-size:1.5rem;font-weight:800;line-height:1;min-width:1.6rem;text-align:right;}
+  .mpb-icon{font-size:1.4rem;font-weight:800;line-height:1;min-width:1.4rem;text-align:right;}
   .mpb-icon.win{color:var(--green-dark);}
-  .mpb-icon.loss{color:var(--muted);opacity:0.5;}
-  .mpb-icon.halved-text{color:var(--gold);}
-  .mpb-result{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;margin-top:3px;
-    color:var(--green-dark);font-weight:600;}
-  .mpb-result.loss{color:var(--muted);}
-  .mpb-result.halved-text{color:var(--gold);}
-  .versus-divider{font-family:'Syne',sans-serif;font-weight:800;font-size:0.75rem;color:var(--muted);}
+  .mpb-icon.loss{color:#dc2626;}
+  .mpb-icon.push{color:#3b82f6;}
+  .match-result-text{font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;
+    color:var(--text);line-height:1.3;}
+  .match-result-text.live{color:var(--purple);}
   .team-note{margin-top:6px;font-size:0.75rem;color:var(--muted);}
 
   /* JACKET */
@@ -358,16 +357,7 @@
     font-weight:700; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
     padding:5px 14px; }
 
-  /* MATCHER — match result display */
-  .match-result-banner { 
-    text-align:center; padding:8px 12px; font-family:'Syne',sans-serif;
-    font-weight:800; font-size:0.9rem; border-radius:8px; margin:6px 0;
-  }
-  .match-result-banner.win { background:var(--green-light); color:var(--green-dark); }
-  .match-result-banner.halved { background:var(--gold-light); color:var(--gold); }
-  .match-result-banner.live { background:var(--purple-pale); color:var(--purple); }
-  .team-result-row { margin-top:8px; padding:8px 12px; background:var(--bg);
-    border-radius:8px; border:1px solid var(--border); font-size:0.82rem; }
+
 
   /* TOP 10 */
   .top10-tabs { display:flex; border-bottom:1px solid var(--border); }
@@ -1083,35 +1073,33 @@ function renderMatcher() {
       const halved = res.halved || res.text?.toLowerCase().includes('halved');
       const live = !p1win && !p2win && !halved && res.text !== '—';
 
-      // Result banner text
+      // Result text for center column
       let bannerText = '', bannerCls = '';
       if (halved) { bannerText = 'Halved'; bannerCls = 'halved'; }
       else if (p1win || p2win) {
-        const w = p1win?p1n:p2n, l = p1win?p2n:p1n;
-        // Extract margin from short (e.g. "3&2", "1 Up")
-        const margin = res.short && res.short !== '—' ? res.short : '';
-        bannerText = margin ? `${w} wins ${margin}` : `${w} wins`;
+        // Show just the margin: "3&2", "1 Up", etc.
+        bannerText = res.short && res.short !== '—' ? res.short : 'W';
         bannerCls = 'win';
       } else if (live) {
         bannerText = res.text;
         bannerCls = 'live';
       }
 
+      const pushCls = halved ? 'push' : '';
       return `<div class="match-versus">
-        <div class="match-player-box ${p1win?'winner':p2win?'loser':halved?'halved':''}">
+        <div class="match-player-box ${p1win?'winner':p2win?'loser':halved?'push':''}">
           <div class="mpb-inner">
             <div class="mpb-name">${p1n}</div>
-            <div class="mpb-icon ${p1win?'win':p2win?'loss':halved?'halved-text':''}">${p1win?'✓':p2win?'✗':halved?'½':live?'…':''}</div>
+            <div class="mpb-icon ${p1win?'win':p2win?'loss':halved?'push':''}">${p1win?'✓':p2win?'✗':halved?'½':live?'…':''}</div>
           </div>
         </div>
-        <div class="match-vs-col">
-          <div class="versus-divider">vs</div>
-          ${bannerText?`<div class="match-result-banner ${bannerCls}">${bannerText}</div>`:''}
+        <div class="match-result-col">
+          <div class="match-result-text ${live?'live':''}">${bannerText||'—'}</div>
         </div>
-        <div class="match-player-box ${p2win?'winner':p1win?'loser':halved?'halved':''}">
+        <div class="match-player-box ${p2win?'winner':p1win?'loser':halved?'push':''}">
           <div class="mpb-inner">
             <div class="mpb-name">${p2n}</div>
-            <div class="mpb-icon ${p2win?'win':p1win?'loss':halved?'halved-text':''}">${p2win?'✓':p1win?'✗':halved?'½':live?'…':''}</div>
+            <div class="mpb-icon ${p2win?'win':p1win?'loss':halved?'push':''}">${p2win?'✓':p1win?'✗':halved?'½':live?'…':''}</div>
           </div>
         </div>
       </div>`;
@@ -1139,21 +1127,27 @@ function renderMatcher() {
       if (tHalved) { tBannerText='Halved'; tBannerCls='halved'; }
       else if (tWin1||tWin2) { tBannerText=teamResultText; tBannerCls='win'; }
       else if (tLive && teamResultText) { tBannerText=teamResultText; tBannerCls='live'; }
+      // Simplify team banner to just margin
+      let tResultDisplay = tBannerText;
+      if ((tWin1||tWin2) && tBannerText) {
+        // strip winner name prefix if present, keep just the margin
+        const margin = tBannerText.replace(/^[\w+]+ wins? ?/, '').trim() || tBannerText;
+        tResultDisplay = margin;
+      }
       html += `<div class="match-versus" style="margin-top:8px;">
-        <div class="match-player-box ${tWin1?'winner':tWin2?'loser':tHalved?'halved':''}">
+        <div class="match-player-box ${tWin1?'winner':tWin2?'loser':tHalved?'push':''}">
           <div class="mpb-inner">
-            <div style="font-weight:700;font-size:0.88rem;">🏌 ${t1n}</div>
-            <div class="mpb-icon ${tWin1?'win':tWin2?'loss':tHalved?'halved-text':''}">${tWin1?'✓':tWin2?'✗':tHalved?'½':''}</div>
+            <div style="font-weight:700;font-size:0.82rem;">🏌 ${t1n}</div>
+            <div class="mpb-icon ${tWin1?'win':tWin2?'loss':tHalved?'push':''}">${tWin1?'✓':tWin2?'✗':tHalved?'½':''}</div>
           </div>
         </div>
-        <div class="match-vs-col">
-          <div class="versus-divider">vs</div>
-          ${tBannerText?`<div class="match-result-banner ${tBannerCls}">${tBannerText}</div>`:''}
+        <div class="match-result-col">
+          <div class="match-result-text">${tResultDisplay||'—'}</div>
         </div>
-        <div class="match-player-box ${tWin2?'winner':tWin1?'loser':tHalved?'halved':''}">
+        <div class="match-player-box ${tWin2?'winner':tWin1?'loser':tHalved?'push':''}">
           <div class="mpb-inner">
-            <div style="font-weight:700;font-size:0.88rem;">🏌 ${t2n}</div>
-            <div class="mpb-icon ${tWin2?'win':tWin1?'loss':tHalved?'halved-text':''}">${tWin2?'✓':tWin1?'✗':tHalved?'½':''}</div>
+            <div style="font-weight:700;font-size:0.82rem;">🏌 ${t2n}</div>
+            <div class="mpb-icon ${tWin2?'win':tWin1?'loss':tHalved?'push':''}">${tWin2?'✓':tWin1?'✗':tHalved?'½':''}</div>
           </div>
         </div>
       </div>`;
