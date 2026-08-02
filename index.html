@@ -373,10 +373,11 @@
     color:var(--purple-light); min-width:28px; text-align:center; padding-top:2px; }
   .top10-rank.in { color:var(--purple); }
   .top10-text { flex:1; font-size:0.9rem; line-height:1.5; }
-  .top10-handle { cursor:grab; color:var(--border); font-size:1.1rem; padding-top:2px;
-    display:flex; flex-direction:column; gap:2px; user-select:none; }
-  .top10-handle:active { cursor:grabbing; }
-  .top10-handle span { width:18px; height:2px; background:var(--muted); border-radius:2px; display:block; }
+  .top10-move-btn { background:none; border:1px solid var(--border); border-radius:5px;
+    color:var(--muted); font-size:0.7rem; cursor:pointer; padding:2px 5px; line-height:1;
+    transition:all 0.1s; }
+  .top10-move-btn:hover:not([disabled]) { background:var(--purple-pale); color:var(--purple);
+    border-color:var(--purple); }
   .top10-delete { color:#fca5a5; font-size:0.8rem; cursor:pointer; padding:2px 6px;
     border-radius:6px; border:none; background:none; margin-top:2px; }
   .top10-delete:hover { background:#fee2e2; color:var(--red); }
@@ -387,10 +388,52 @@
   .top10-divider { text-align:center; padding:8px; font-size:0.72rem; font-weight:700;
     letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);
     background:var(--bg); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
-  .top10-item.dragging { opacity:0.4; background:var(--purple-pale); }
-  .top10-item.drag-over { border-top:2px solid var(--purple); }
+
   .top10-lock-screen { display:flex; flex-direction:column; align-items:center;
     justify-content:center; padding:40px 20px; }
+
+  /* PALMER'S PROPS */
+  .props-question { padding:14px 18px; border-bottom:1px solid var(--border); }
+  .props-question:last-child { border-bottom:none; }
+  .props-q-header { display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; }
+  .props-q-num { font-family:'Syne',sans-serif; font-weight:800; font-size:1rem;
+    color:var(--purple-light); min-width:28px; }
+  .props-q-num.answered { color:var(--purple); }
+  .props-q-text { font-weight:700; font-size:0.9rem; flex:1; line-height:1.4; }
+  .props-answers { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:8px; }
+  .props-answer-box { padding:8px 10px; border-radius:8px; border:1.5px solid var(--border);
+    background:var(--bg); }
+  .props-answer-name { font-size:0.65rem; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+  .props-answer-val { font-size:0.88rem; font-weight:600; color:var(--text); min-height:1.2em; }
+  .props-answer-box.correct { border-color:var(--green); background:var(--green-light); }
+  .props-answer-box.correct .props-answer-val { color:var(--green-dark); }
+  .props-result-row { display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
+  .props-correct-label { font-size:0.72rem; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--muted); }
+  .props-correct-val { font-family:'Syne',sans-serif; font-weight:800; font-size:0.88rem;
+    color:var(--green-dark); background:var(--green-light); padding:3px 10px;
+    border-radius:6px; }
+  .props-correct-val.pending { color:var(--muted); background:var(--bg);
+    border:1px dashed var(--border); }
+  .props-winners { display:flex; gap:5px; flex-wrap:wrap; }
+  .props-winner-chip { font-size:0.72rem; font-weight:700; padding:2px 8px;
+    border-radius:6px; background:var(--purple-light); color:var(--purple); }
+  .props-score-row { display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
+    padding:14px 18px; border-top:2px solid var(--purple); background:var(--purple-pale); }
+  .props-score-box { text-align:center; }
+  .props-score-name { font-size:0.65rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--muted); }
+  .props-score-val { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem;
+    color:var(--purple); }
+  .props-score-val.leader { color:var(--green-dark); }
+  .props-edit-btn { background:none; border:1.5px solid var(--border); border-radius:8px;
+    padding:6px 12px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.78rem;
+    color:var(--muted); cursor:pointer; transition:all 0.15s; }
+  .props-edit-btn:hover { border-color:var(--purple); color:var(--purple);
+    background:var(--purple-pale); }
+  .props-edit-btn.active { border-color:var(--purple); color:var(--purple);
+    background:var(--purple-pale); }
 
   @media(max-width:500px){  @media(max-width:500px){
     .lb-header,.lb-row{grid-template-columns:30px 1fr 38px 38px 38px 38px 58px;padding:10px 12px;}
@@ -412,6 +455,7 @@
     <button onclick="showPage('jacket')">Jacket</button>
     <button onclick="showPage('history')">History</button>
     <button onclick="showPage('top10')">Top 10</button>
+    <button onclick="showPage('props')">Props</button>
     <button onclick="showPage('enter')">Enter</button>
   </nav>
 </header>
@@ -422,6 +466,7 @@
   <div id="page-jacket" class="page"></div>
   <div id="page-history" class="page"></div>
   <div id="page-top10" class="page"></div>
+  <div id="page-props" class="page"></div>
   <div id="page-enter" class="page"></div>
 </main>
 
@@ -671,9 +716,22 @@ function getAwards(year) {
 function computeMatchResult(holeScores, p1idx, p2idx) {
   if (!holeScores) return { text:'—', short:'—', winner:null };
   let p1up = 0, holes = 0;
+  let clinchHole = -1;  // hole index where match was clinched
   for (let h=0; h<18; h++) {
     const s1 = holeScores[h][p1idx], s2 = holeScores[h][p2idx];
-    if (s1 && s2) { holes++; if(s1<s2) p1up++; else if(s2<s1) p1up--; }
+    if (s1 && s2) {
+      holes++;
+      if (s1<s2) p1up++; else if (s2<s1) p1up--;
+      // Check if match is clinched after this hole
+      const remaining = 18 - holes;
+      if (Math.abs(p1up) > remaining && clinchHole === -1) {
+        clinchHole = holes; // stop counting here
+        break;
+      }
+    } else if (clinchHole === -1) {
+      // No score yet for this hole — if match already won, stop
+      break;
+    }
   }
   const p1n = PLAYERS[p1idx], p2n = PLAYERS[p2idx];
   if (holes === 0) return { text:'No scores', short:'—', winner:null };
@@ -687,6 +745,7 @@ function computeMatchResult(holeScores, p1idx, p2idx) {
   const winner = p1up > 0 ? p1n : p2n;
   const loser  = p1up > 0 ? p2n : p1n;
   if (lead > remaining) {
+    // Match clinched — show standard format: X&Y or X Up (if on last hole)
     const margin = remaining===0 ? `${lead} Up` : `${lead}&${remaining}`;
     return { text:`${winner} wins ${margin}`, short:margin, winner, loser };
   }
@@ -786,7 +845,7 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const idx = ['scores','matcher','jacket','history','top10','enter'].indexOf(id);
+  const idx = ['scores','matcher','jacket','history','top10','props','enter'].indexOf(id);
   document.querySelectorAll('nav button')[idx].classList.add('active');
   currentPage = id;
   window.scrollTo(0,0);
@@ -799,6 +858,7 @@ function renderPage(id) {
   else if (id==='jacket') renderJacket();
   else if (id==='history') renderHistory();
   else if (id==='top10') { fetchData().then(renderTop10); }
+  else if (id==='props') { fetchData().then(renderProps); }
   else if (id==='enter') renderEnter();
 }
 
@@ -1109,50 +1169,7 @@ function renderMatcher() {
     html += renderMatchVersus(mi.m1, mi.m1Result);
     html += `<div style="margin-top:8px;">` + renderMatchVersus(mi.m2, mi.m2Result) + `</div>`;
 
-    if (mi.team && r < 4) {
-      // Compute team match result
-      let teamResultText = mi.teamResult || '';
-      if (!teamResultText && holeScores) {
-        teamResultText = computeTeamMatchResult(holeScores, mi.team);
-      }
-      // Parse team match same way as individual
-      const tparts = mi.team.split(' vs ');
-      const t1n = tparts[0]?.trim() || '', t2n = tparts[1]?.trim() || '';
-      let tWin1=false, tWin2=false, tHalved=false, tLive=false;
-      if (teamResultText) {
-        tHalved = teamResultText.toLowerCase().includes('halved') || teamResultText.toLowerCase().includes('all square');
-        tWin1 = !tHalved && teamResultText.toLowerCase().startsWith(t1n.toLowerCase().split('+')[0]);
-        tWin2 = !tHalved && !tWin1 && teamResultText.length > 0;
-      } else { tLive = true; }
-      let tBannerText='', tBannerCls='';
-      if (tHalved) { tBannerText='Halved'; tBannerCls='halved'; }
-      else if (tWin1||tWin2) { tBannerText=teamResultText; tBannerCls='win'; }
-      else if (tLive && teamResultText) { tBannerText=teamResultText; tBannerCls='live'; }
-      // Simplify team banner to just margin
-      let tResultDisplay = tBannerText;
-      if ((tWin1||tWin2) && tBannerText) {
-        // strip winner name prefix if present, keep just the margin
-        const margin = tBannerText.replace(/^[\w+]+ wins? ?/, '').trim() || tBannerText;
-        tResultDisplay = margin;
-      }
-      html += `<div class="match-versus" style="margin-top:8px;">
-        <div class="match-player-box ${tWin1?'winner':tWin2?'loser':tHalved?'push':''}">
-          <div class="mpb-inner">
-            <div style="font-weight:700;font-size:0.82rem;">🏌 ${t1n}</div>
-            <div class="mpb-icon ${tWin1?'win':tWin2?'loss':tHalved?'push':''}">${tWin1?'✓':tWin2?'✗':tHalved?'½':''}</div>
-          </div>
-        </div>
-        <div class="match-result-col">
-          <div class="match-result-text">${tResultDisplay||'—'}</div>
-        </div>
-        <div class="match-player-box ${tWin2?'winner':tWin1?'loser':tHalved?'push':''}">
-          <div class="mpb-inner">
-            <div style="font-weight:700;font-size:0.82rem;">🏌 ${t2n}</div>
-            <div class="mpb-icon ${tWin2?'win':tWin1?'loss':tHalved?'push':''}">${tWin2?'✓':tWin1?'✗':tHalved?'½':''}</div>
-          </div>
-        </div>
-      </div>`;
-    }
+
     html += `</div>`;
   });
 
@@ -1440,7 +1457,7 @@ function buildMatchSummary(mi) {
 // ════════════════════════════════════════════════
 let top10Tab = 'quotes'; // quotes | memories
 let top10Unlocked = false;
-let top10DragSrc = null;
+
 
 function loadTop10Data() {
   // Build from DB.top10 which is loaded from Google Sheets
@@ -1491,14 +1508,15 @@ function renderTop10() {
     const top10 = items.slice(0, 10);
     const rest  = items.slice(10);
 
+    const totalItems = items.length;
     top10.forEach((item, i) => {
-      html += renderTop10Item(item, i, true, top10Unlocked);
+      html += renderTop10Item(item, i, true, top10Unlocked, totalItems);
     });
 
     if (top10Unlocked && rest.length) {
       html += `<div class="top10-divider">— Outside Top 10 —</div>`;
       rest.forEach((item, i) => {
-        html += renderTop10Item(item, i+10, false, true);
+        html += renderTop10Item(item, i+10, false, true, totalItems);
       });
     }
   }
@@ -1520,20 +1538,17 @@ function renderTop10() {
   if (top10Unlocked) attachDragEvents();
 }
 
-function renderTop10Item(text, idx, inTop10, editable) {
+function renderTop10Item(text, idx, inTop10, editable, totalItems) {
   const rank = idx + 1;
-  return `<div class="top10-item" draggable="${editable}" data-idx="${idx}"
-    ondragstart="top10DragStart(event,${idx})"
-    ondragover="top10DragOver(event)"
-    ondrop="top10Drop(event,${idx})"
-    ondragend="top10DragEnd(event)">
+  return `<div class="top10-item" data-idx="${idx}">
     <div class="top10-rank ${inTop10?'in':''}">${rank}</div>
     <div class="top10-text">${escHtml(text)}</div>
     ${editable ? `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <div class="top10-handle" title="Drag to reorder">
-          <span></span><span></span><span></span>
-        </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <button class="top10-move-btn" onclick="moveTop10Item(${idx},-1)"
+          ${idx===0?'disabled style="opacity:0.2"':''} title="Move up">▲</button>
+        <button class="top10-move-btn" onclick="moveTop10Item(${idx},1)"
+          ${idx===totalItems-1?'disabled style="opacity:0.2"':''} title="Move down">▼</button>
         <button class="top10-delete" onclick="deleteTop10Item(${idx})" title="Delete">✕</button>
       </div>` : ''}
   </div>`;
@@ -1580,43 +1595,18 @@ async function deleteTop10Item(idx) {
   showToast('Deleted', 'success');
 }
 
-// Drag and drop reordering
-function top10DragStart(e, idx) {
-  top10DragSrc = idx;
-  e.currentTarget.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-}
-
-function top10DragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  document.querySelectorAll('.top10-item').forEach(el => el.classList.remove('drag-over'));
-  e.currentTarget.closest('.top10-item')?.classList.add('drag-over');
-}
-
-async function top10Drop(e, targetIdx) {
-  e.preventDefault();
-  if (top10DragSrc === null || top10DragSrc === targetIdx) return;
+// Up/down reordering
+async function moveTop10Item(idx, direction) {
   const data = loadTop10Data();
   const items = data[top10Tab];
-  const [moved] = items.splice(top10DragSrc, 1);
-  items.splice(targetIdx, 0, moved);
-  top10DragSrc = null;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= items.length) return;
+  // Swap
+  [items[idx], items[newIdx]] = [items[newIdx], items[idx]];
   showToast('Saving…');
   await saveTop10Data(data, top10Tab);
   renderTop10();
   showToast('Order saved!', 'success');
-}
-
-function top10DragEnd(e) {
-  top10DragSrc = null;
-  document.querySelectorAll('.top10-item').forEach(el => {
-    el.classList.remove('dragging','drag-over');
-  });
-}
-
-function attachDragEvents() {
-  // Events are attached inline via HTML attributes above, nothing extra needed
 }
 
 // ════════════════════════════════════════════════
@@ -2266,6 +2256,162 @@ async function init() {
 
   updateHeader();
   renderScores();
+}
+
+
+// ════════════════════════════════════════════════
+//  PALMER'S PROPS PAGE
+// ════════════════════════════════════════════════
+let propsUnlocked = false;
+let propsEditMode = false;
+
+function loadPropsData() {
+  if (!DB.props || !DB.props.length) return { questions:[], answers:{}, correct:{} };
+  const questions = DB.props
+    .filter(r => r.Type === 'question')
+    .sort((a,b) => +a.Num - +b.Num)
+    .map(r => ({ num: +r.Num, text: r.Text }));
+
+  const answers = {};
+  const correct = {};
+  DB.props.filter(r => r.Type === 'answer').forEach(r => {
+    if (!answers[+r.Num]) answers[+r.Num] = {};
+    answers[+r.Num][r.Player] = r.Text;
+  });
+  DB.props.filter(r => r.Type === 'correct').forEach(r => {
+    correct[+r.Num] = { answer: r.Text, winners: r.Player ? r.Player.split(',') : [] };
+  });
+  return { questions, answers, correct };
+}
+
+function renderProps() {
+  const { questions, answers, correct } = loadPropsData();
+  const year = currentEventYear();
+  const gt = gtNum(year);
+
+  let html = `<div class="card">
+    <div class="card-head">
+      <div class="card-title">🏌 Palmer's Props · ${gt}</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        ${propsUnlocked
+          ? `<button class="props-edit-btn ${propsEditMode?'active':''}"
+              onclick="propsEditMode=!propsEditMode;renderProps()">
+              ${propsEditMode?'✓ Done Editing':'✏️ Edit'}
+            </button>`
+          : `<button class="props-edit-btn" onclick="unlockProps()">🔒 Edit</button>`}
+      </div>
+    </div>`;
+
+  if (!questions.length) {
+    html += `<div class="empty-state"><div class="es-icon">🏌</div>
+      <div class="es-title">No questions yet for ${year}</div>
+      <div class="es-sub">Add questions to the "props" tab in Google Sheets.</div>
+    </div>`;
+  } else {
+    // Scores: count correct answers per player
+    const scores = {};
+    PLAYERS.forEach(p => scores[p] = 0);
+    Object.keys(correct).forEach(num => {
+      const c = correct[num];
+      const qAnswers = answers[+num] || {};
+      if (c.answer) {
+        PLAYERS.forEach(p => {
+          if (qAnswers[p] && qAnswers[p].trim().toLowerCase() === c.answer.trim().toLowerCase()) {
+            scores[p]++;
+          }
+        });
+      }
+      // Also use explicit winners list if provided
+      if (c.winners && c.winners.length) {
+        c.winners.forEach(w => { if(scores[w] !== undefined) scores[w]++; });
+      }
+    });
+
+    const maxScore = Math.max(...Object.values(scores));
+
+    // Scoreboard at top
+    const sortedPlayers = [...PLAYERS].sort((a,b) => scores[b]-scores[a]);
+    html += `<div class="props-score-row">
+      ${sortedPlayers.map(p => `<div class="props-score-box">
+        <div class="props-score-name">${p}</div>
+        <div class="props-score-val ${scores[p]===maxScore&&maxScore>0?'leader':''}">${scores[p]}</div>
+      </div>`).join('')}
+    </div>`;
+
+    // Questions
+    questions.forEach(q => {
+      const qAnswers = answers[q.num] || {};
+      const qCorrect = correct[q.num];
+      const hasCorrect = qCorrect && qCorrect.answer;
+      const answeredCount = PLAYERS.filter(p => qAnswers[p]).length;
+
+      // Determine winners for this question
+      let winners = [];
+      if (hasCorrect) {
+        winners = PLAYERS.filter(p =>
+          qAnswers[p] && qAnswers[p].trim().toLowerCase() === qCorrect.answer.trim().toLowerCase()
+        );
+        if (qCorrect.winners && qCorrect.winners.length) winners = qCorrect.winners;
+      }
+
+      html += `<div class="props-question">
+        <div class="props-q-header">
+          <div class="props-q-num ${answeredCount===4||hasCorrect?'answered':''}">${q.num}.</div>
+          <div class="props-q-text">${escHtml(q.text)}</div>
+        </div>
+        <div class="props-answers">
+          ${PLAYERS.map(p => {
+            const ans = qAnswers[p] || '';
+            const isWinner = winners.includes(p);
+            return `<div class="props-answer-box ${isWinner?'correct':''}">
+              <div class="props-answer-name">${p}</div>
+              <div class="props-answer-val">${escHtml(ans) || '<span style="color:#ddd;">—</span>'}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="props-result-row">
+          <span class="props-correct-label">Correct:</span>
+          ${propsEditMode
+            ? `<input type="text" style="padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);
+                font-size:0.85rem;width:160px;" placeholder="Enter correct answer"
+                value="${escHtml(qCorrect?.answer||'')}"
+                onchange="savePropsCorrect(${q.num},this.value)">`
+            : `<span class="props-correct-val ${hasCorrect?'':'pending'}">${hasCorrect?escHtml(qCorrect.answer):'TBD'}</span>`}
+          ${winners.length ? `<div class="props-winners">
+            ${winners.map(w=>`<span class="props-winner-chip">✓ ${w}</span>`).join('')}
+          </div>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+
+  html += `</div>`;
+  document.getElementById('page-props').innerHTML = html;
+}
+
+function unlockProps() {
+  const pw = prompt('Enter password to edit:');
+  if (pw === ENTER_PASSWORD) {
+    propsUnlocked = true;
+    propsEditMode = true;
+    renderProps();
+  } else if (pw !== null) {
+    showToast('Incorrect password', 'error');
+  }
+}
+
+async function savePropsCorrect(num, answer) {
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'savePropsCorrect', num, answer: answer.trim() })
+    });
+    await fetchData();
+    renderProps();
+    showToast('Saved!', 'success');
+  } catch(e) {
+    showToast('Error saving', 'error');
+  }
 }
 
 window.addEventListener('DOMContentLoaded', init);
