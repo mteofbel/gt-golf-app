@@ -435,6 +435,61 @@
   .props-edit-btn.active { border-color:var(--purple); color:var(--purple);
     background:var(--purple-pale); }
 
+  /* MEDIA PAGE */
+  .media-tabs{display:flex;border-bottom:1px solid var(--border);}
+  .media-tab{flex:1;padding:12px;text-align:center;font-family:'Syne',sans-serif;
+    font-size:0.85rem;font-weight:700;color:var(--muted);cursor:pointer;background:none;
+    border:none;border-bottom:3px solid transparent;transition:all 0.15s;}
+  .media-tab.active{color:var(--purple);border-bottom-color:var(--purple);}
+  .media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;}
+  .media-thumb{position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;
+    background:#111;border-radius:4px;}
+  .media-thumb img{width:100%;height:100%;object-fit:cover;transition:opacity 0.2s;}
+  .media-thumb:hover img{opacity:0.85;}
+  .media-thumb .play-icon{position:absolute;inset:0;display:flex;align-items:center;
+    justify-content:center;font-size:2rem;color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);}
+  .media-thumb .no-thumb{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:4px;background:#1a1228;color:white;}
+  .media-thumb .no-thumb .nt-icon{font-size:1.8rem;}
+  .media-thumb .no-thumb .nt-name{font-size:0.55rem;padding:0 4px;text-align:center;
+    word-break:break-all;opacity:0.7;}
+  .media-upload-bar{display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;border-top:1px solid var(--border);background:var(--bg);}
+  .media-upload-btn{background:var(--purple);color:white;border:none;padding:10px 18px;
+    border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;
+    cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.15s;}
+  .media-upload-btn:hover{background:#1e0045;}
+  .media-upload-lock{background:none;border:1.5px solid var(--border);color:var(--muted);
+    padding:10px 18px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;
+    font-size:0.85rem;cursor:pointer;transition:all 0.15s;}
+  .media-upload-lock:hover{border-color:var(--purple);color:var(--purple);}
+  .media-count{font-size:0.78rem;color:var(--muted);}
+
+  /* LIGHTBOX */
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:500;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .lightbox.hidden{display:none;}
+  .lb-top-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:16px 20px;
+    background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);}
+  .lb-back{background:none;border:none;color:white;font-family:'Syne',sans-serif;
+    font-weight:700;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:6px;}
+  .lb-counter{color:rgba(255,255,255,0.6);font-size:0.82rem;font-family:'IBM Plex Mono',monospace;}
+  .lb-close{background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;
+    width:36px;height:36px;display:flex;align-items:center;justify-content:center;}
+  .lb-media-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+    padding:60px 16px;}
+  .lb-media-wrap img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;}
+  .lb-media-wrap video{max-width:100%;max-height:100%;border-radius:4px;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);
+    border:none;color:white;font-size:1.4rem;cursor:pointer;width:44px;height:44px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    transition:background 0.15s;}
+  .lb-nav:hover{background:rgba(255,255,255,0.3);}
+  .lb-nav.prev{left:12px;}
+  .lb-nav.next{right:12px;}
+  .lb-nav:disabled{opacity:0.2;cursor:default;}
+
   @media(max-width:500px){  @media(max-width:500px){
     .lb-header,.lb-row{grid-template-columns:30px 1fr 38px 38px 38px 38px 58px;padding:10px 12px;}
     .setup-2col{grid-template-columns:1fr;}
@@ -456,6 +511,7 @@
     <button onclick="showPage('history')">History</button>
     <button onclick="showPage('top10')">Top 10</button>
     <button onclick="showPage('props')">Props</button>
+    <button onclick="showPage('media')">Media</button>
     <button onclick="showPage('enter')">Enter</button>
   </nav>
 </header>
@@ -467,7 +523,23 @@
   <div id="page-history" class="page"></div>
   <div id="page-top10" class="page"></div>
   <div id="page-props" class="page"></div>
+  <div id="page-media" class="page"></div>
   <div id="page-enter" class="page"></div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox hidden" id="lightbox"
+  ontouchstart="lbTouchStart(event)"
+  ontouchend="lbTouchEnd(event)">
+  <div class="lb-top-bar">
+    <button class="lb-back" onclick="closeLightbox()">← Back</button>
+    <span class="lb-counter" id="lb-counter"></span>
+    <button class="lb-close" onclick="closeLightbox()">✕</button>
+  </div>
+  <div class="lb-media-wrap" id="lb-media-wrap"></div>
+  <button class="lb-nav prev" id="lb-prev" onclick="lbNav(-1)">‹</button>
+  <button class="lb-nav next" id="lb-next" onclick="lbNav(1)">›</button>
+</div>
+
 </main>
 
 <div class="toast" id="toast"></div>
@@ -501,6 +573,9 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ2shJosBTwjy195IwO
 const GT_START = 2008;
 const CAL_YEAR = new Date().getFullYear();
 const PLAYERS = ['MTE','CJL','JDW','MJP'];
+const DRIVE_FOLDER_ID = '1rfE6XAMCGz5Vdi3o9tM3ZN--LB9I0o0I';
+const DRIVE_API_KEY   = 'AIzaSyBCTNZIWsJq8lw7FvcnWx6PKfmIPNTZi00';
+const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1rfE6XAMCGz5Vdi3o9tM3ZN--LB9I0o0I';
 const COURSE_PARS = {"Chelan Muni": [5, 3, 4, 4, 4, 4, 3, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5, 3], "Desert Canyon": [4, 4, 5, 3, 5, 4, 5, 3, 4, 5, 4, 4, 4, 3, 5, 3, 4, 5], "Gamble Sands - Scarecrow": [4, 3, 5, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 4, 5, 3, 4, 4], "Gamble Sands": [4, 4, 5, 3, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 4, 3, 4, 5], "Highlander": [4, 4, 3, 5, 5, 4, 3, 5, 3, 4, 4, 3, 5, 3, 4, 4, 4, 3], "Bear Mountain": [4, 4, 3, 4, 5, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 4, 3, 5]};
 
 // Award start years (from config tab, these are defaults)
@@ -845,7 +920,7 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const idx = ['scores','matcher','jacket','history','top10','props','enter'].indexOf(id);
+  const idx = ['scores','matcher','jacket','history','top10','props','media','enter'].indexOf(id);
   document.querySelectorAll('nav button')[idx].classList.add('active');
   currentPage = id;
   window.scrollTo(0,0);
@@ -859,6 +934,7 @@ function renderPage(id) {
   else if (id==='history') renderHistory();
   else if (id==='top10') { fetchData().then(renderTop10); }
   else if (id==='props') { fetchData().then(renderProps); }
+  else if (id==='media') renderMedia();
   else if (id==='enter') renderEnter();
 }
 
@@ -2413,6 +2489,193 @@ async function savePropsCorrect(num, answer) {
     showToast('Error saving', 'error');
   }
 }
+
+
+// ════════════════════════════════════════════════
+//  MEDIA PAGE
+// ════════════════════════════════════════════════
+let mediaUnlocked = false;
+let mediaTab = 'photos';  // photos | videos
+let mediaFiles = { photos:[], videos:[] };
+let lbIndex = 0;
+let lbList = [];
+let lbTouchX = null;
+
+async function fetchMediaFiles() {
+  try {
+    const mimeFilter = mediaTab === 'photos'
+      ? "mimeType contains 'image/'"
+      : "mimeType contains 'video/'";
+    const q = encodeURIComponent(`'${DRIVE_FOLDER_ID}' in parents and (${mimeFilter}) and trashed=false`);
+    const fields = encodeURIComponent('files(id,name,mimeType,createdTime,thumbnailLink,webViewLink)');
+    const url = `https://www.googleapis.com/drive/v3/files?q=${q}&key=${DRIVE_API_KEY}&fields=${fields}&orderBy=createdTime desc&pageSize=200`;
+    const res = await fetch(url);
+    const json = await res.json();
+    return json.files || [];
+  } catch(e) {
+    console.error('Drive fetch error:', e);
+    return [];
+  }
+}
+
+async function renderMedia() {
+  const el = document.getElementById('page-media');
+  el.innerHTML = loading('Loading media…');
+
+  const files = await fetchMediaFiles();
+  mediaFiles[mediaTab] = files;
+  lbList = files;
+
+  let html = `<div class="card">
+    <div class="media-tabs">
+      <button class="media-tab ${mediaTab==='photos'?'active':''}" onclick="switchMediaTab('photos')">📷 Photos</button>
+      <button class="media-tab ${mediaTab==='videos'?'active':''}" onclick="switchMediaTab('videos')">🎥 Videos</button>
+    </div>`;
+
+  if (!files.length) {
+    html += `<div class="empty-state">
+      <div class="es-icon">${mediaTab==='photos'?'📷':'🎥'}</div>
+      <div class="es-title">No ${mediaTab} yet</div>
+      <div class="es-sub">Upload the first one using the button below.</div>
+    </div>`;
+  } else {
+    html += `<div class="media-grid">`;
+    files.forEach((f, i) => {
+      const isVideo = f.mimeType?.startsWith('video/');
+      const thumb = f.thumbnailLink
+        ? f.thumbnailLink.replace('=s220', '=s400')
+        : null;
+
+      if (thumb) {
+        html += `<div class="media-thumb" onclick="openLightbox(${i})">
+          <img src="${thumb}" loading="lazy" alt="${f.name}">
+          ${isVideo ? '<div class="play-icon">▶</div>' : ''}
+        </div>`;
+      } else {
+        html += `<div class="media-thumb" onclick="openLightbox(${i})">
+          <div class="no-thumb">
+            <div class="nt-icon">${isVideo?'🎥':'📷'}</div>
+            <div class="nt-name">${f.name}</div>
+          </div>
+          ${isVideo ? '<div class="play-icon" style="position:absolute;bottom:8px;right:8px;font-size:1.2rem;">▶</div>' : ''}
+        </div>`;
+      }
+    });
+    html += `</div>`;
+  }
+
+  // Upload bar
+  html += `<div class="media-upload-bar">
+    <span class="media-count">${files.length} ${mediaTab}</span>
+    ${mediaUnlocked
+      ? `<a href="${DRIVE_FOLDER_URL}" target="_blank" class="media-upload-btn">
+          ↑ Upload to Drive
+        </a>`
+      : `<button class="media-upload-lock" onclick="unlockMedia()">🔒 Upload</button>`
+    }
+  </div>`;
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function switchMediaTab(tab) {
+  mediaTab = tab;
+  renderMedia();
+}
+
+function unlockMedia() {
+  const pw = prompt('Enter password to access upload:');
+  if (pw === ENTER_PASSWORD) {
+    mediaUnlocked = true;
+    renderMedia();
+  } else if (pw !== null) {
+    showToast('Incorrect password', 'error');
+  }
+}
+
+// ── LIGHTBOX ──
+function openLightbox(idx) {
+  lbIndex = idx;
+  lbList = mediaFiles[mediaTab];
+  document.getElementById('lightbox').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  lbShow();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+  document.body.style.overflow = '';
+  // Stop any playing video
+  const wrap = document.getElementById('lb-media-wrap');
+  const vid = wrap.querySelector('video');
+  if (vid) vid.pause();
+}
+
+function lbShow() {
+  const f = lbList[lbIndex];
+  if (!f) return;
+  const wrap = document.getElementById('lb-media-wrap');
+  const counter = document.getElementById('lb-counter');
+  const prev = document.getElementById('lb-prev');
+  const next = document.getElementById('lb-next');
+
+  counter.textContent = `${lbIndex+1} / ${lbList.length}`;
+  prev.disabled = lbIndex === 0;
+  next.disabled = lbIndex === lbList.length - 1;
+
+  // Stop previous video if any
+  const oldVid = wrap.querySelector('video');
+  if (oldVid) oldVid.pause();
+
+  const isVideo = f.mimeType?.startsWith('video/');
+  if (isVideo) {
+    // Use webViewLink for video — Drive's viewer handles it
+    wrap.innerHTML = `<video controls autoplay playsinline
+      style="max-width:100%;max-height:100%;border-radius:4px;"
+      src="https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${DRIVE_API_KEY}">
+      <p style="color:white;">
+        <a href="${f.webViewLink}" target="_blank" style="color:#c4b5fd;">Open video in Drive</a>
+      </p>
+    </video>`;
+  } else {
+    // Full-res image via Drive API
+    const src = `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${DRIVE_API_KEY}`;
+    wrap.innerHTML = `<img src="${src}" alt="${f.name}"
+      style="max-width:100%;max-height:100%;object-fit:contain;">`;
+  }
+}
+
+function lbNav(dir) {
+  const newIdx = lbIndex + dir;
+  if (newIdx < 0 || newIdx >= lbList.length) return;
+  const wrap = document.getElementById('lb-media-wrap');
+  const vid = wrap.querySelector('video');
+  if (vid) vid.pause();
+  lbIndex = newIdx;
+  lbShow();
+}
+
+// Swipe support
+function lbTouchStart(e) {
+  lbTouchX = e.touches[0].clientX;
+}
+function lbTouchEnd(e) {
+  if (lbTouchX === null) return;
+  const dx = e.changedTouches[0].clientX - lbTouchX;
+  lbTouchX = null;
+  if (Math.abs(dx) < 50) return;
+  lbNav(dx < 0 ? 1 : -1);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (lb.classList.contains('hidden')) return;
+  if (e.key === 'ArrowRight') lbNav(1);
+  if (e.key === 'ArrowLeft') lbNav(-1);
+  if (e.key === 'Escape') closeLightbox();
+});
 
 window.addEventListener('DOMContentLoaded', init);
 </script>
