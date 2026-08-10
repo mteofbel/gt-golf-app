@@ -573,8 +573,6 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ2shJosBTwjy195IwO
 const GT_START = 2008;
 const CAL_YEAR = new Date().getFullYear();
 const PLAYERS = ['MTE','CJL','JDW','MJP'];
-const DRIVE_FOLDER_ID = '1rfE6XAMCGz5Vdi3o9tM3ZN--LB9I0o0I';
-const DRIVE_API_KEY   = 'AIzaSyBCTNZIWsJq8lw7FvcnWx6PKfmIPNTZi00';
 const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1rfE6XAMCGz5Vdi3o9tM3ZN--LB9I0o0I';
 const COURSE_PARS = {"Chelan Muni": [5, 3, 4, 4, 4, 4, 3, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5, 3], "Desert Canyon": [4, 4, 5, 3, 5, 4, 5, 3, 4, 5, 4, 4, 4, 3, 5, 3, 4, 5], "Gamble Sands - Scarecrow": [4, 3, 5, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 4, 5, 3, 4, 4], "Gamble Sands": [4, 4, 5, 3, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 4, 3, 4, 5], "Highlander": [4, 4, 3, 5, 5, 4, 3, 5, 3, 4, 4, 3, 5, 3, 4, 4, 4, 3], "Bear Mountain": [4, 4, 3, 4, 5, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 4, 3, 5]};
 
@@ -2503,15 +2501,10 @@ let lbTouchX = null;
 
 async function fetchMediaFiles() {
   try {
-    const mimeFilter = mediaTab === 'photos'
-      ? "mimeType contains 'image/'"
-      : "mimeType contains 'video/'";
-    const q = encodeURIComponent(`'${DRIVE_FOLDER_ID}' in parents and (${mimeFilter}) and trashed=false`);
-    const fields = encodeURIComponent('files(id,name,mimeType,createdTime,thumbnailLink,webViewLink)');
-    const url = `https://www.googleapis.com/drive/v3/files?q=${q}&key=${DRIVE_API_KEY}&fields=${fields}&orderBy=createdTime desc&pageSize=200`;
-    const res = await fetch(url);
+    const action = mediaTab === 'photos' ? 'getPhotos' : 'getVideos';
+    const res = await fetch(`${SCRIPT_URL}?action=${action}`);
     const json = await res.json();
-    return json.files || [];
+    return Array.isArray(json) ? json : [];
   } catch(e) {
     console.error('Drive fetch error:', e);
     return [];
@@ -2631,16 +2624,23 @@ function lbShow() {
   const isVideo = f.mimeType?.startsWith('video/');
   if (isVideo) {
     // Use webViewLink for video — Drive's viewer handles it
-    wrap.innerHTML = `<video controls autoplay playsinline
-      style="max-width:100%;max-height:100%;border-radius:4px;"
-      src="https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${DRIVE_API_KEY}">
-      <p style="color:white;">
-        <a href="${f.webViewLink}" target="_blank" style="color:#c4b5fd;">Open video in Drive</a>
-      </p>
-    </video>`;
+    // Drive videos: open in Drive viewer since direct streaming requires auth
+    wrap.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;
+        justify-content:center;gap:20px;color:white;text-align:center;padding:20px;">
+      <div style="font-size:3rem;">🎥</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">${f.name}</div>
+      <a href="${f.webViewLink}" target="_blank"
+        style="background:var(--purple);color:white;padding:14px 28px;border-radius:12px;
+          font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;text-decoration:none;
+          display:inline-flex;align-items:center;gap:8px;">
+        ▶ Play in Google Drive
+      </a>
+      <div style="font-size:0.75rem;opacity:0.5;">Opens in a new tab</div>
+    </div>`;
   } else {
     // Full-res image via Drive API
-    const src = `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${DRIVE_API_KEY}`;
+    // Use Drive's direct view URL for full-res image (no API key needed for public files)
+    const src = `https://drive.google.com/uc?export=view&id=${f.id}`;
     wrap.innerHTML = `<img src="${src}" alt="${f.name}"
       style="max-width:100%;max-height:100%;object-fit:contain;">`;
   }
